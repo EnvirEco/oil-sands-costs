@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Methodology — Alberta Oil Sands TIER Carbon Cost Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #f0f2f5;
+    --surf1:    #ffffff;
+    --surf2:    #f7f9fb;
+    --border:   #dde1e7;
+    --border2:  #c8cdd6;
+    --text:     #0d1117;
+    --muted:    #2c3a4a;
+    --dim:      #6b7588;
+    --amber:    #d4960a;
+    --amber-lt: #e8a80c;
+    --red:      #c0392b;
+    --green:    #1e7e4a;
+    --blue:     #1a4f8a;
+    --sans:     'DM Sans', sans-serif;
+    --mono:     'DM Mono', monospace;
+    --max-w:    760px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── TOP BANNER ─────────────────────────────── */
+  .banner {
+    background: var(--text);
+    padding: 28px 32px 24px;
+    border-bottom: 3px solid var(--amber);
+  }
+  .banner-eyebrow {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .2em;
+    color: var(--amber-lt);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .banner-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+  }
+  .banner-sub {
+    font-size: 13px;
+    color: #8b949e;
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  /* ── LAYOUT ─────────────────────────────────── */
+  .page { max-width: var(--max-w); margin: 0 auto; padding: 36px 24px 64px; }
+
+  /* ── INTRO BOX ──────────────────────────────── */
+  .intro {
+    background: var(--surf1);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--amber);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-bottom: 36px;
+    font-size: 14.5px;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  /* ── SECTIONS ───────────────────────────────── */
+  .section { margin-bottom: 40px; }
+
+  .section-hd {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: var(--amber);
+    background: #fef9ec;
+    border: 1px solid #f0d88a;
+    border-radius: 3px;
+    padding: 2px 7px;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -.01em;
+  }
+
+  .section p { color: var(--muted); margin-bottom: 12px; font-size: 14.5px; }
+  .section p:last-child { margin-bottom: 0; }
+
+  /* ── FORMULA BOXES ──────────────────────────── */
+  .formula {
+    background: var(--surf2);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--blue);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 14px 0;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--text);
+    line-height: 1.9;
+  }
+  .formula .comment {
+    color: var(--dim);
+    font-size: 11px;
+  }
+
+  /* ── CALLOUT BOXES ──────────────────────────── */
+  .callout {
+    background: #f0f7ff;
+    border: 1px solid #bdd5f0;
+    border-radius: 5px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 13.5px;
+    color: #1a3a5c;
+  }
+  .callout strong { color: var(--blue); }
+
+  .callout-warn {
+    background: #fffbf0;
+    border-color: #f0d88a;
+    color: #5c4200;
+  }
+  .callout-warn strong { color: var(--amber); }
+
+  /* ── PARAMETER TABLE ────────────────────────── */
+  .param-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 14px 0;
+  }
+  .param-table th {
+    background: var(--text);
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 400;
+  }
+  .param-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--muted);
+  }
+  .param-table tr:nth-child(even) td { background: var(--surf2); }
+  .param-table .mono { font-family: var(--mono); font-size: 12px; color: var(--text); }
+  .param-table .lbl { font-weight: 500; color: var(--text); }
+
+  /* ── STATUS BADGES ──────────────────────────── */
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    padding: 2px 6px;
+  }
+  .badge-red   { background: #fdecea; color: var(--red); border: 1px solid #f5c6c2; }
+  .badge-green { background: #e8f5ee; color: var(--green); border: 1px solid #b3dcc5; }
+  .badge-amber { background: #fef9ec; color: #7a5700; border: 1px solid #f0d88a; }
+
+  /* ── FLOW DIAGRAM ───────────────────────────── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 16px 0;
+  }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 16px;
+    background: var(--surf1);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .flow-step:not(:last-child) { border-bottom: none; }
+  .flow-step:first-child { border-radius: 5px 5px 0 0; }
+  .flow-step:last-child  { border-radius: 0 0 5px 5px; }
+  .flow-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--amber);
+    background: #fef9ec;
+    border: 1px solid #f0d88a;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .flow-content strong { font-weight: 600; color: var(--text); font-size: 14px; }
+  .flow-content p { font-size: 13px; color: var(--muted); margin: 3px 0 0; }
+
+  /* ── FOOTER ─────────────────────────────────── */
+  .footer {
+    margin-top: 52px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--dim);
+    letter-spacing: .05em;
+  }
+  .footer a { color: var(--amber); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <div class="banner-eyebrow">Technical Documentation · v4</div>
+  <div class="banner-title">Alberta Oil Sands TIER Carbon Cost Model</div>
+  <div class="banner-sub">Methodology &amp; Key Assumptions · Dave Sawyer </div>
+</div>
+
+<div class="page">
+
+  <div class="intro">
+    This model simulates the financial exposure of 29 Alberta oil sands facilities under the province's
+    <strong>TIER</strong> (Technology Innovation and Emissions Reduction) carbon pricing system and its
+    complex royalty regime. It projects per-barrel carbon costs from 2024 to 2030 as the carbon price
+    rises to $130/tonne, benchmarks tighten, and facilities work to improve their emissions efficiency.
+  </div>
+
+
+  <!-- ══ SECTION 1 ══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hd">
+      <span class="section-num">01</span>
+      <span class="section-title">Carbon Pricing &amp; Benchmarks</span>
+    </div>
+
+    <p>Under TIER, each facility is assigned an <strong>emissions benchmark</strong> — the maximum
+    allowable emissions intensity (tCO₂e per m³ of bitumen produced) before a carbon cost applies.
+    If a facility's actual intensity exceeds its benchmark, it owes carbon payments proportional to
+    the gap. If it performs better than its benchmark, it earns tradeable <strong>Emission Performance
+    Credits (EPCs)</strong>.</p>
+
+    <div class="formula">
+      Net Position (t/m³) = Intensity − Benchmark<br>
+      <span class="comment">// positive → debit obligation; negative → credit earned</span><br><br>
+      After-Tax-Shield Cost ($/bbl) = Net Position × Carbon Price × (1 − Tax Shield)<br>
+      <span class="comment">// Tax shield = royalty rate + CIT rate (debit facilities only)</span>
+    </div>
+
+    <p>Benchmarks are derived from the 2023 true-up compliance data for all 34 TIER registrations, then
+    cleaned into 29 logical facility groups by netting cogen sub-registrations into parent facilities
+    and combining split registrations (e.g., Kirby South + North).</p>
+
+    <div class="callout">
+      <strong>Credit treatment:</strong> Credit revenue is taxed at the corporate income tax rate only
+      (23%), regardless of payout status, since royalties do not apply to credit sales. Debit costs are
+      shielded by both royalty and CIT at the combined marginal rate.
+    </div>
+  </div>
+
+
+  <!-- ══ SECTION 2 ══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hd">
+      <span class="section-num">02</span>
+      <span class="section-title">The Benchmark Ratchet</span>
+    </div>
+
+    <p>To drive ongoing decarbonization, TIER benchmarks do not stay fixed. The model applies an
+    annual tightening schedule — a <strong>"ratchet"</strong> — that reduces each facility's allowable
+    benchmark year over year. This creates a narrowing window: even a facility that achieves meaningful
+    emissions improvements can find itself moving into debit territory as the standard advances faster
+    than it can improve.</p>
+
+    <div class="formula">
+      Benchmark(t) = Benchmark(2023) × (1 − ratchet_rate)^(t − 2023)<br>
+      <span class="comment">// ratchet rate: 2–4% per year, facility-specific</span>
+    </div>
+
+    <p>The ratchet schedule reflects AER's TIER regulation pathway toward the $170/tonne
+    Emissions-Capped Maximum Policy (EMCP) target by 2030. Facilities with high current intensity
+    relative to sector peers face the sharpest exposure as benchmarks converge toward best-in-class
+    performance levels.</p>
+
+    <div class="callout callout-warn">
+      <strong>Policy assumption:</strong> The model assumes benchmark tightening continues
+      through 2030 on the current trajectory. Any regulatory revision — including AER's periodic
+      benchmark reviews or a federal–provincial MOU that adjusts EMCP targets — would directly
+      affect cost projections.
+    </div>
+  </div>
+
+
+  <!-- ══ SECTION 3 ══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hd">
+      <span class="section-num">03</span>
+      <span class="section-title">Autonomous Efficiency Improvement (AEI)</span>
+    </div>
+
+    <p>Facilities are not passive in the face of tightening benchmarks. The model estimates each
+    facility's <strong>Autonomous Efficiency Improvement (AEI)</strong> rate — its historical tendency
+    to reduce emissions intensity each year through incremental operational improvements, technology
+    adoption, and production optimization — without requiring major capital investment.</p>
+
+    <p>AEI is estimated using an OLS log-linear regression on 2019–2023 intensity data from Alberta's
+    GHGRP facility reporting:</p>
+
+    <div class="formula">
+      ln(Intensity_t) = α + β·Year + ε<br>
+      <span class="comment">// AEI rate = −β (annual fractional improvement)</span><br>
+      <span class="comment">// p &lt; 0.10 required; default 0% AEI if trend not significant</span>
+    </div>
+
+    <p>AEI is capped at 4% per year — roughly the upper bound observed across the sector. Facilities
+    with statistically insignificant trends (most of the sector) are assigned 0.5% AEI as a modest
+    baseline assumption. Of 29 facilities, only 4–5 show
+    statistically significant improvement trends.</p>
+
+    <div class="callout">
+      <strong>Key insight:</strong> AEI is the primary "defence" a facility has against rising
+      benchmark costs. High-AEI facilities (e.g., Foster Creek, CNRL Muskeg/Jackpine) effectively
+      track the ratchet and hold costs stable. Zero-AEI facilities (e.g., Cold Lake, Tucker Thermal)
+      face a pure carbon price escalation as the benchmark pulls away from their fixed intensity.
+    </div>
+  </div>
+
+
+  <!-- ══ SECTION 4 ══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hd">
+      <span class="section-num">04</span>
+      <span class="section-title">Alberta Royalty — Sliding Scale &amp; Tax Shield</span>
+    </div>
+
+    <p>Alberta's oil sands royalty is a <strong>sliding scale</strong> linked to WTI oil prices.
+    Pre-payout projects pay a low gross royalty (1–9%) on revenue until their initial capital
+    investment is recovered. Post-payout projects pay a net royalty on profits that ranges from
+    25% at low oil prices up to 40% at $100+ WTI.</p>
+
+    <table class="param-table">
+      <thead>
+        <tr>
+          <th>WTI (USD/bbl)</th>
+          <th>Gross Royalty % (pre-payout)</th>
+          <th>Net Royalty % (post-payout)</th>
+          <th>Combined Tax Shield</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">$55–$63</td><td>1.0%</td><td>25.0%</td><td class="mono">0.54</td></tr>
+        <tr><td class="mono">$75 (base)</td><td>2.6%</td><td>29.9%</td><td class="mono">0.54</td></tr>
+        <tr><td class="mono">$90</td><td>4.7%</td><td>36.0%</td><td class="mono">0.49</td></tr>
+        <tr><td class="mono">$100+</td><td>6.0%+</td><td>40.0%</td><td class="mono">0.46</td></tr>
+      </tbody>
+    </table>
+
+    <p>Because carbon costs are treated as <strong>"allowed costs"</strong> under the Alberta royalty
+    formula, they reduce net revenue and therefore reduce the royalty payable. This creates an effective
+    government subsidy of the carbon cost proportional to the royalty rate — the <em>royalty tax
+    shield</em>. Combined with the 23% CIT deduction, post-payout facilities at $75 WTI recover
+    approximately 46% of their gross carbon cost through the combined shield.</p>
+
+    <div class="formula">
+      After-Shield Cost = Gross Cost × (1 − Royalty_rate − CIT_rate)<br>
+      <span class="comment">// post-payout at $75 WTI: (1 − 0.299 − 0.23) = 0.471 effective multiplier</span><br>
+      <span class="comment">// pre-payout: (1 − 0.026 − 0.23) = 0.744 (lower shield → higher net cost)</span>
+    </div>
+
+    <p>Seven facilities are modelled as <strong>pre-payout</strong> in 2024 (Kearl, Surmont, Long Lake,
+    Sunrise, CNUL Peace River, Wolf Lake &amp; Primrose, Hangingstone Expansion), with estimated
+    payout flip years between 2027 and 2028. After flip, their cost exposure increases as the more
+    generous net royalty shield replaces the lower gross royalty.</p>
+  </div>
+
+
+  <!-- ══ SECTION 5 ══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hd">
+      <span class="section-num">05</span>
+      <span class="section-title">Carbon Price Schedule</span>
+    </div>
+
+    <p>The model uses a scheduled TIER carbon price path reflecting the federal–provincial backstop
+    trajectory and Alberta's own TIER regulation commitments:</p>
+
+    <table class="param-table">
+      <thead>
+        <tr><th>Year</th><th>Carbon Price ($/tonne)</th><th>Note</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2024</td><td class="mono">$58.33</td><td>7/12 of $65 + 5/12 of $50</td></tr>
+        <tr><td>2025</td><td class="mono">$51.67</td><td>Reflects regulatory transition period</td></tr>
+        <tr><td>2026</td><td class="mono">$45.00</td><td>TIER floor under current regulation</td></tr>
+        <tr><td>2027</td><td class="mono">$66.25</td><td>Step increase toward EMCP pathway</td></tr>
+        <tr><td>2028</td><td class="mono">$87.50</td><td></td></tr>
+        <tr><td>2029</td><td class="mono">$108.75</td><td></td></tr>
+        <tr><td>2030</td><td class="mono">$130.00</td><td>EMCP target year</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-warn">
+      <strong>Key uncertainty:</strong> The 2024–2026 price path reflects the current federal–provincial
+      MOU framework and is subject to renegotiation. The 2027–2030 ramp is modelled as a linear
+      path to $130 but is uncertain pending AER's next benchmark review cycle.
+    </div>
+  </div>
+
+
+  <!-- ══ SECTION 6 ══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hd">
+      <span class="section-num">06</span>
+      <span class="section-title">Monte Carlo Risk Analysis</span>
+    </div>
+
+    <p>Rather than a single deterministic forecast, the model runs <strong>5,000 Monte Carlo
+    simulations</strong> to capture the range of plausible outcomes under uncertainty in three key
+    dimensions:</p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">A</div>
+        <div class="flow-content">
+          <strong>Oil Price Uncertainty</strong>
+          <p>WTI drawn from a truncated normal distribution: mean $75/bbl, σ = $15/bbl,
+          bounds [$40, $120]. Drives royalty rate, netback, and the tax shield multiplier
+          simultaneously — creating a non-linear cost response at price extremes.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">B</div>
+        <div class="flow-content">
+          <strong>AEI Rate Uncertainty</strong>
+          <p>Each facility's AEI rate is drawn from a normal distribution centred on its OLS estimate,
+          with standard deviation equal to the regression standard error. Facilities with statistically
+          insignificant trends are given a small positive mean (0.5%) with wider spread to allow for
+          possible improvement, rather than a hard zero.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">C</div>
+        <div class="flow-content">
+          <strong>Payout Flip Year Uncertainty</strong>
+          <p>For the 7 pre-payout facilities, the payout year is drawn from a discrete uniform
+          distribution spanning ±2 years around the central estimate. This captures the impact of
+          oil price variation on the speed of capital recovery, which is itself a function of
+          uncertain future revenues.</p>
+        </div>
+      </div>
+    </div>
+
+    <p>Results are reported as percentile ranges (P10/P25/P50/P75/P90) at both the facility and
+    sector level. The P50 deterministic case is shown in this dashboard. Wide P10–P90 spreads
+    indicate facilities where AEI or payout uncertainty dominates; narrow spreads indicate
+    facilities where the cost trajectory is relatively well-constrained.</p>
+  </div>
+
+
+  <!-- ══ SECTION 7 ══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hd">
+      <span class="section-num">07</span>
+      <span class="section-title">Data Sources &amp; Coverage</span>
+    </div>
+
+    <table class="param-table">
+      <thead>
+        <tr><th>Data Element</th><th>Source</th><th>Coverage</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="lbl">2023 Compliance Positions</td>
+          <td>AER TIER Registration True-Up</td>
+          <td>34 TIER IDs → 29 logical facilities</td>
+        </tr>
+        <tr>
+          <td class="lbl">Emissions Intensity History</td>
+          <td><a href="https://open.alberta.ca/opendata/alberta-oil-sands-greenhouse-gas-emission-intensity-analysis" target="_blank" style="color:var(--blue);text-decoration:none;border-bottom:1px dotted var(--blue)">Alberta Oil Sands GHG Emission Intensity Analysis</a><br><span style="font-size:11px;color:var(--dim)">Government of Alberta Open Data</span></td>
+          <td>2011–2023, 29 facilities</td>
+        </tr>
+        <tr>
+          <td class="lbl">Production &amp; Royalty Data</td>
+          <td>AER ST-39, ST-3 Production Reports</td>
+          <td>2019–2023 actuals</td>
+        </tr>
+        <tr>
+          <td class="lbl">Royalty Formula Parameters</td>
+          <td>Alberta Royalty Regulation (AR 248/2009)</td>
+          <td>Current as of 2024</td>
+        </tr>
+        <tr>
+          <td class="lbl">Carbon Price Schedule</td>
+          <td>TIER Regulation + Federal MOU Framework</td>
+          <td>2024–2030 projected</td>
+        </tr>
+        <tr>
+          <td class="lbl">Payout Status</td>
+          <td>AER Annual Reports, company disclosures</td>
+          <td>2024 base year; 7 pre-payout facilities</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Facility coverage:</strong> The 29 modelled facilities represent the full population of
+      Alberta oil sands operations with active TIER registrations as of 2023. Three very small pilot
+      projects (Germain SAGD, STP McKay Thermal, Blackrod SAGD Pilot) were excluded due to
+      negligible production volumes and absence from the intensity history dataset.
+    </div>
+  </div>
+
+
+  <!-- ══ SECTION 8 ══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hd">
+      <span class="section-num">08</span>
+      <span class="section-title">Key Limitations &amp; Caveats</span>
+    </div>
+
+    <p>This model is designed for policy analysis and should be interpreted accordingly:</p>
+
+    <table class="param-table">
+      <thead>
+        <tr><th>Limitation</th><th>Implication</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="lbl">Production volumes held constant at 2023 levels</td>
+          <td>Does not capture expansion projects, shutdowns, or ramp-up/ramp-down dynamics</td>
+        </tr>
+        <tr>
+          <td class="lbl">No carbon credit market pricing</td>
+          <td>Credit revenue is computed at face value (carbon price × gap); secondary market
+          discounts are not modelled</td>
+        </tr>
+        <tr>
+          <td class="lbl">Single netback assumption ($132 CAD/bbl base)</td>
+          <td>Does not differentiate SCO premiums vs. dilbit discounts across facility types</td>
+        </tr>
+        <tr>
+          <td class="lbl">Benchmarks derived from 2023 single-year data</td>
+          <td>Does not account for AER's periodic benchmark recalibration or new entrant
+          benchmark treatment</td>
+        </tr>
+        <tr>
+          <td class="lbl">AEI estimated from 2019–2023 only</td>
+          <td>Short window may not capture structural efficiency changes pre- or post-COVID
+          production disruption</td>
+        </tr>
+        <tr>
+          <td class="lbl">Netback is price realization, not true netback</td>
+          <td>Operating costs (~$15–25/bbl) are not deducted from the sales denominator used
+          in the cost containment ratio. The WCS-WTI differential is fixed at −$30 CAD for
+          in-situ and does not reflect TMX-related spread tightening since 2024. Both
+          factors inflate the denominator, <em>understating</em> the CC ratio — the breach
+          count should be treated as a conservative lower bound.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+
+  <!-- ══ SECTION 9 ══════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-hd">
+      <span class="section-num">09</span>
+      <span class="section-title">Cost Containment Program &amp; Benchmark Relief</span>
+    </div>
+
+    <p>Alberta's TIER regulation includes a <strong>Compliance Cost Containment Program</strong> that
+    provides formal relief to facilities experiencing economic hardship from carbon compliance
+    obligations. Understanding where facilities sit relative to the cost containment threshold is
+    essential context for interpreting the model's projected costs.</p>
+
+    <div class="callout">
+      <strong>Trigger:</strong> A facility qualifies for cost containment designation when
+      TIER compliance costs exceed <strong>3% of gross sales revenue</strong> in a given compliance
+      year (a profit test also exists at 10% of profit, but is not modelled here). Once designated,
+      relief is provided in two sequential steps: first, removal of the credit use limit
+      (allowing 100% of the compliance obligation to be satisfied with credits); and if that is
+      insufficient, a <strong>Compliance Cost Containment Benchmark Allocation (BCCA)</strong> —
+      an additive upward benchmark adjustment that directly reduces the compliance obligation.
+      Designations last up to five years.
+    </div>
+
+    <p>The compliance cost used in the sales test is the <strong>net after-tax-shield cost</strong>
+    — i.e., the actual cash cost to the facility after royalty and CIT deductions. At a base case
+    netback of $71 CAD/bbl, the 3% trigger equals approximately <strong>$2.14/bbl net compliance
+    cost</strong>. This threshold rises with oil price (higher netback → higher dollar threshold),
+    which is why some facilities breach at low oil prices but not at high oil prices. The profit
+    test (10% of profit) is not modelled; with an assumed ~50% operating margin it would not
+    be a binding constraint for the facilities identified here. Note that the netback used here
+    is price realization only — operating costs are not deducted — which inflates the
+    denominator and <strong>understates</strong> the CC ratio. The facility breach counts
+    should be read as a conservative lower bound.</p>
+
+    <div class="formula">
+      CC Ratio = Net Compliance Cost ($/bbl) / Netback ($/bbl)<br>
+      <span class="comment">// Trigger: CC Ratio &gt; 3%</span><br>
+      <span class="comment">// At $71/bbl netback: threshold = $2.14/bbl net cost</span><br>
+      <span class="comment">// At $97/bbl (high oil): threshold = $2.91/bbl net cost</span><br>
+      <span class="comment">// At $46/bbl (low oil):  threshold = $1.38/bbl net cost</span>
+    </div>
+
+    <h4 style="font-size:13px;font-weight:600;color:var(--text);margin:18px 0 10px">First year of threshold breach — base case ($75 WTI) · net cost basis</h4>
+
+    <table class="param-table">
+      <thead>
+        <tr><th>Facility</th><th>First Breach Year</th><th>Peak CC Ratio (2030)</th><th>Scenarios</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="lbl">Tucker Thermal</td>         <td>2028</td><td class="mono" style="color:var(--red)">6.4%</td> <td>All scenarios</td></tr>
+        <tr><td class="lbl">Hangingstone Demo</td>      <td>2029</td><td class="mono" style="color:var(--red)">3.6%</td> <td>All scenarios</td></tr>
+        <tr><td class="lbl">Cold Lake</td>              <td>2030</td><td class="mono" style="color:var(--amber)">3.7%</td><td>All scenarios</td></tr>
+        <tr><td class="lbl">Lindbergh</td>              <td>2030</td><td class="mono" style="color:var(--amber)">3.7%</td><td>All scenarios</td></tr>
+        <tr><td class="lbl">Kirby</td>                  <td>2030</td><td class="mono" style="color:var(--amber)">3.5%</td><td>All scenarios</td></tr>
+        <tr><td class="lbl">Hangingstone Expansion</td> <td>2030</td><td class="mono" style="color:var(--amber)">3.4%</td><td>All scenarios</td></tr>
+        <tr><td class="lbl">Orion</td>                  <td>—</td>   <td class="mono">2.2%</td><td>Low oil only (3.7%)</td></tr>
+        <tr><td class="lbl">BlackGold SAGD</td>         <td>—</td>   <td class="mono">2.2%</td><td>Low oil only (3.7%)</td></tr>
+        <tr><td class="lbl">MacKay River Commercial</td><td>—</td>   <td class="mono">1.8%</td><td>Low oil only (3.0%)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout callout-warn">
+      <strong>Important framing note:</strong> The costs shown in this dashboard are
+      <em>pre-relief gross exposure</em> — they represent compliance obligations <em>before</em>
+      any BCCA benchmark adjustment is applied. This is a deliberate analytical choice.
+      For federal–provincial policy purposes, the uncapped costs are the more informative signal:
+      they show the structural pressure on the system that motivates industry requests for
+      benchmark relief and that drives the design of the EMCP pathway. A model that automatically
+      applies cost containment caps would obscure exactly the policy stress it is meant to
+      illuminate. The &#9651; amber flags in the dashboard mark facilities where relief would
+      likely be triggered.
+    </div>
+
+    <p>The Standard for Developing Benchmarks (Version 2) is available at the
+    <a href="https://open.alberta.ca/publications/standard-developing-benchmarks-tier-version-2"
+    target="_blank" style="color:var(--blue);text-decoration:none;border-bottom:1px dotted var(--blue)">
+    Government of Alberta Open Data portal</a>. The list of past cost containment designees
+    (2018–2022) is also publicly available and may be useful for validating which facilities
+    have historically applied for relief.</p>
+  </div>
+
+  <div class="footer">
+    <div>Model v4 · Dataset: oilsands_model_data_v4.csv · 29 facilities · 2024–2030</div>
+    <div style="margin-top:4px">Dave Sawyer / EnviroEconomics</div>
+  </div>
+
+</div>
+</body>
+</html>

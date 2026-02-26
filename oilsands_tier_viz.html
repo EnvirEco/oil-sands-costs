@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alberta Oil Sands — TIER Carbon Cost</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:       #f0f2f5;
+  --surf1:    #ffffff;
+  --surf2:    #f7f9fb;
+  --border:   #dde1e7;
+  --border2:  #c8cdd6;
+  --text:     #0d1117;
+  --muted:    #2c3a4a;
+  --dim:      #6b7588;
+  --amber:    #b07d1a;
+  --amber-lt: #d4960a;
+  --red:      #c0392b;
+  --red-lt:   #e74c3c;
+  --green:    #1a7a42;
+  --green-lt: #27ae60;
+  --blue:     #2563a8;
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+}
+body { font-family: var(--sans); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+header {
+  background: var(--surf1); border-bottom: 1px solid var(--border);
+  padding: 20px 32px 0;
+}
+.hd-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 24px; padding-bottom: 16px;
+}
+.hd-eyebrow {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em;
+  color: var(--amber-lt); text-transform: uppercase; margin-bottom: 5px;
+}
+.hd-title { font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
+.hd-sub   { font-size: 12px; color: var(--muted); margin-top: 3px; font-weight: 300; }
+.method-link {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--amber); border: 1px solid var(--amber); border-radius: 3px;
+  padding: 3px 9px; text-decoration: none; margin-top: 8px; display: inline-block;
+  transition: .15s;
+}
+.method-link:hover { background: var(--amber); color: var(--surf1); }
+
+/* YEAR CONTROL */
+.year-ctl { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+.year-num { font-family: var(--mono); font-size: 34px; font-weight: 500; color: var(--amber-lt); line-height: 1; }
+.year-lbl { font-family: var(--mono); font-size: 8.5px; letter-spacing: .15em; color: var(--muted); text-transform: uppercase; }
+.scrub-row { display: flex; align-items: center; gap: 7px; }
+.yr-btn {
+  background: var(--surf2); border: 1px solid var(--border2); color: var(--muted);
+  width: 24px; height: 24px; border-radius: 4px; font-size: 12px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: .15s;
+}
+.yr-btn:hover { color: var(--amber-lt); border-color: var(--amber); }
+input[type=range] {
+  -webkit-appearance: none; width: 155px; height: 2px;
+  background: var(--border2); border-radius: 2px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 11px; height: 11px;
+  background: var(--amber-lt); border-radius: 50%; transition: transform .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.4); }
+.yr-ticks { display: flex; justify-content: space-between; width: 155px; font-family: var(--mono); font-size: 7.5px; color: var(--dim); }
+
+/* SECTOR TOGGLE */
+.sector-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 0 12px; border-top: 1px solid var(--border); flex-wrap: wrap;
+}
+.sector-lbl {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .12em;
+  color: var(--muted); text-transform: uppercase; margin-right: 4px;
+}
+.s-pill {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: .08em;
+  padding: 4px 11px; border: 1px solid var(--border2); color: var(--muted);
+  border-radius: 20px; cursor: pointer; text-transform: uppercase;
+  transition: .15s; user-select: none; background: var(--surf2);
+}
+.s-pill:hover { color: var(--text); }
+.s-pill.on { color: var(--surf1); border-color: transparent; }
+
+/* KPI STRIP */
+.kpi-strip { background: var(--surf1); border-bottom: 1px solid var(--border); display: flex; }
+.kpi { flex: 1; padding: 13px 20px; border-right: 1px solid var(--border); }
+.kpi:last-child { border-right: none; }
+.kpi-lbl { font-family: var(--mono); font-size: 8.5px; letter-spacing: .13em; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
+.kpi-val { font-family: var(--mono); font-size: 20px; font-weight: 500; line-height: 1; }
+.kpi-val.red   { color: var(--red); }
+.kpi-val.green { color: var(--green); }
+.kpi-val.amber { color: var(--amber-lt); }
+.kpi-sub { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+/* GRID */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
+.panel { background: var(--surf1); border: 1px solid var(--border); border-radius: 6px; padding: 20px 22px 16px; }
+.panel-wide { grid-column: 1 / -1; }
+.panel-hd { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.panel-title { font-family: var(--mono); font-size: 9.5px; letter-spacing: .13em; color: var(--muted); text-transform: uppercase; }
+.panel-hd::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+.leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+.leg-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.axis-lbl { font-family: 'DM Mono', monospace; font-size: 9px; fill: #2c3a4a; }
+.cc-flag { font-family: var(--mono); font-size: 9px; color: var(--amber); }
+.grid-ln  { stroke: #dde1e7; stroke-width: 1; }
+.zero-ln  { stroke: #c8cdd6; stroke-width: 1; stroke-dasharray: 4 3; }
+
+#tt {
+  position: fixed; pointer-events: none; background: var(--surf1);
+  border: 1px solid var(--border2); border-left: 3px solid var(--amber-lt);
+  padding: 10px 14px; font-family: var(--mono); font-size: 10px; line-height: 1.75;
+  opacity: 0; transition: opacity .12s; z-index: 999; max-width: 260px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.10);
+}
+#tt.show { opacity: 1; }
+#tt-title { font-size: 11px; font-weight: 500; color: var(--amber-lt); margin-bottom: 3px; }
+.tt-row   { display: flex; justify-content: space-between; gap: 12px; }
+.tt-k     { color: var(--muted); }
+.tt-v     { color: var(--text); }
+.tt-debit  { color: var(--red); font-weight: 500; }
+.tt-credit { color: var(--green); font-weight: 500; }
+.tt-warn   { color: var(--amber); font-weight: 500; }
+
+circle, rect, path { transition: opacity .18s; }
+@keyframes fadeIn { from {opacity:0;transform:translateY(5px);} to {opacity:1;transform:translateY(0);} }
+.panel { animation: fadeIn .3s ease both; }
+.panel:nth-child(1){animation-delay:.05s} .panel:nth-child(2){animation-delay:.10s} .panel:nth-child(3){animation-delay:.14s}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd-top">
+    <div>
+      <div class="hd-eyebrow">Alberta Oil Sands &nbsp;/&nbsp; TIER Compliance Analysis</div>
+      <div class="hd-title">Facility Carbon Cost &amp; Credit Revenue &nbsp;2024–2030</div>
+      <div class="hd-sub">After-tax-shield net cost ($/bbl) &nbsp;·&nbsp; Sliding-scale royalty &nbsp;·&nbsp; WTI $75 base case &nbsp;·&nbsp; 29 facilities</div>
+      <a class="method-link" href="methodology.html" target="_blank">&#128196; Methodology</a>
+    </div>
+    <div class="year-ctl">
+      <div class="year-num" id="yrNum">2026</div>
+      <div class="year-lbl">Forecast Year</div>
+      <div class="scrub-row">
+        <button class="yr-btn" id="yrPrev">&#8592;</button>
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <input type="range" id="yrSlide" min="2024" max="2030" step="1" value="2026">
+          <div class="yr-ticks"><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span>30</span></div>
+        </div>
+        <button class="yr-btn" id="yrNext">&#8594;</button>
+      </div>
+    </div>
+  </div>
+  <div class="sector-bar" id="sectorBar">
+    <span class="sector-lbl">Sector:</span>
+    <button class="s-pill on" data-type="ALL" style="background:var(--text);color:var(--surf1)">All Facilities</button>
+  </div>
+</header>
+
+<div class="kpi-strip">
+  <div class="kpi" style="border-left:3px solid var(--amber)"><div class="kpi-lbl">Wt. Avg Net Position</div><div class="kpi-val" style="color:var(--text)" id="kWtdAvg">—</div><div class="kpi-sub" id="kWtdSub">production-weighted $/bbl</div></div>
+  <div class="kpi"><div class="kpi-lbl">In Debit</div><div class="kpi-val red" id="kDebit">—</div><div class="kpi-sub" id="kDebitSub"></div></div>
+  <div class="kpi"><div class="kpi-lbl">Avg After-Shield Cost / bbl</div><div class="kpi-val red" id="kAvgCost">—</div><div class="kpi-sub" id="kMaxCost"></div></div>
+  <div class="kpi"><div class="kpi-lbl">Earning Credits</div><div class="kpi-val green" id="kCredit">—</div><div class="kpi-sub">net credit revenue</div></div>
+  <div class="kpi"><div class="kpi-lbl">Avg Credit Revenue / bbl</div><div class="kpi-val green" id="kAvgCredit">—</div><div class="kpi-sub" id="kMaxCredit"></div></div>
+  <div class="kpi"><div class="kpi-lbl">TIER cost containment eligibility &nbsp;·&nbsp; &gt;3% of Sales</div><div class="kpi-val" style="color:var(--amber)" id="kCC">—</div><div class="kpi-sub" id="kCCSub">facilities eligible for BCCA</div></div>
+  <div class="kpi"><div class="kpi-lbl">Carbon Price</div><div class="kpi-val amber" id="kCP">—</div><div class="kpi-sub">$/tonne CO₂e · TIER</div></div>
+</div>
+
+<div class="grid">
+  <div class="panel" id="p1">
+    <div class="panel-hd"><span class="panel-title">Intensity vs Benchmark &nbsp;·&nbsp; Debit / Credit Position</span></div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:var(--red-lt)"></div>Debit — above 45° line</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--green-lt)"></div>Credit — below 45° line</div>
+      <div class="leg-item" style="color:var(--dim);font-size:10px">Dot size = production volume</div>
+    </div>
+    <svg id="svgScatter" style="width:100%;display:block" height="270"></svg>
+  </div>
+  <div class="panel" id="p2">
+    <div class="panel-hd"><span class="panel-title">Net Position / bbl &nbsp;·&nbsp; After-Shield Cost vs Credit Revenue</span></div>
+    <div class="legend">
+      <div class="leg-item"><div class="leg-dot" style="background:var(--red-lt)"></div>After-shield debit cost</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--green-lt)"></div>Net credit revenue</div>
+      <div class="leg-item"><div style="width:2px;height:14px;background:var(--amber);border-radius:1px;flex-shrink:0;margin-right:6px"></div>3% sales threshold — BCCA eligibility</div>
+    </div>
+    <svg id="svgPosition" style="width:100%;display:block" height="270"></svg>
+  </div>
+  <div class="panel panel-wide" id="p3">
+    <div class="panel-hd"><span class="panel-title">After-Shield Cost / bbl — Trajectories by Facility</span></div>
+    <svg id="svgTraj" style="width:100%;display:block" height="210"></svg>
+  </div>
+</div>
+
+<div id="tt"><div id="tt-title"></div><div id="tt-body"></div></div>
+
+<script>
+const D = {"2024": [{"facility": "Christina Lake (Cenovus)", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.2606, "benchmark": 0.2661, "net_cost": 0, "net_credit": 0.039, "net_position": -0.039, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 13769028.2, "aei": 0.0174}, {"facility": "Cold Lake", "type": "In Situ (CSS)", "year": 2024, "intensity": 0.6161, "benchmark": 0.4431, "net_cost": 0.866, "net_credit": 0, "net_position": 0.866, "gross_cost": 1.604, "cost_pct_netback": 1.21, "netback": 71.35, "gross_pct": 0.0121, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 7946146.56, "aei": 0}, {"facility": "MacKay River (Suncor)", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.4761, "benchmark": 0.4555, "net_cost": 0.103, "net_credit": 0, "net_position": 0.103, "gross_cost": 0.192, "cost_pct_netback": 0.14, "netback": 71.35, "gross_pct": 0.0014, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1947376.68, "aei": 0.0271}, {"facility": "Mildred Lake & Aurora", "type": "Mining & Upgrading", "year": 2024, "intensity": 0.68, "benchmark": 0.5931, "net_cost": 0.388, "net_credit": 0, "net_position": 0.388, "gross_cost": 0.806, "cost_pct_netback": 0.4, "netback": 96.35, "gross_pct": 0.004, "carbon_price": 58.33, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18382530.9, "aei": 0.01}, {"facility": "CNUL Peace River", "type": "In Situ", "year": 2024, "intensity": 0.8038, "benchmark": 0.9049, "net_cost": 0, "net_credit": 0.722, "net_position": -0.722, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 58.33, "royalty": 0.07, "is_post_payout": false, "status": "CREDIT", "production": 219034.3, "aei": 0.04}, {"facility": "CNRL Muskeg/Jackpine/Scotford", "type": "Mining & Upgrading", "year": 2024, "intensity": 0.2893, "benchmark": 0.3405, "net_cost": 0, "net_credit": 0.365, "net_position": -0.365, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 58.33, "royalty": 0.3741, "is_post_payout": true, "status": "CREDIT", "production": 18125819.7, "aei": 0.0161}, {"facility": "Wolf Lake & Primrose", "type": "In Situ", "year": 2024, "intensity": 0.6177, "benchmark": 0.5085, "net_cost": 0.78, "net_credit": 0, "net_position": 0.78, "gross_cost": 1.013, "cost_pct_netback": 1.09, "netback": 71.35, "gross_pct": 0.0109, "carbon_price": 58.33, "royalty": 0.07, "is_post_payout": false, "status": "DEBIT", "production": 4786594.02, "aei": 0.022}, {"facility": "Long Lake", "type": "In Situ (SAGD+Upg)", "year": 2024, "intensity": 0.4662, "benchmark": 0.499, "net_cost": 0, "net_credit": 0.235, "net_position": -0.235, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 58.33, "royalty": 0.07, "is_post_payout": false, "status": "CREDIT", "production": 3845624.11, "aei": 0.01}, {"facility": "Tucker Thermal", "type": "In Situ (CSS)", "year": 2024, "intensity": 0.8544, "benchmark": 0.5341, "net_cost": 1.603, "net_credit": 0, "net_position": 1.603, "gross_cost": 2.971, "cost_pct_netback": 2.25, "netback": 71.35, "gross_pct": 0.0225, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1065634.2399999998, "aei": 0.01}, {"facility": "Connacher/Great Divide", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.5056, "benchmark": 0.5045, "net_cost": 0.006, "net_credit": 0, "net_position": 0.006, "gross_cost": 0.011, "cost_pct_netback": 0.01, "netback": 71.35, "gross_pct": 0.0001, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 888953.1399999999, "aei": 0.04}, {"facility": "Horizon", "type": "Mining & Upgrading", "year": 2024, "intensity": 0.3496, "benchmark": 0.4243, "net_cost": 0, "net_credit": 0.533, "net_position": -0.533, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 58.33, "royalty": 0.3631, "is_post_payout": true, "status": "CREDIT", "production": 13724260.9, "aei": 0.0043}, {"facility": "Orion", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.4955, "benchmark": 0.4219, "net_cost": 0.368, "net_credit": 0, "net_position": 0.368, "gross_cost": 0.682, "cost_pct_netback": 0.52, "netback": 71.35, "gross_pct": 0.0052, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1202240.6499999997, "aei": 0.01}, {"facility": "Surmont", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.414, "benchmark": 0.3944, "net_cost": 0.14, "net_credit": 0, "net_position": 0.14, "gross_cost": 0.182, "cost_pct_netback": 0.2, "netback": 71.35, "gross_pct": 0.002, "carbon_price": 58.33, "royalty": 0.0708, "is_post_payout": false, "status": "DEBIT", "production": 7402729.460000001, "aei": 0.0034}, {"facility": "Foster Creek", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.3007, "benchmark": 0.3063, "net_cost": 0, "net_credit": 0.04, "net_position": -0.04, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 10628774.689999998, "aei": 0.04}, {"facility": "Firebag", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.3923, "benchmark": 0.372, "net_cost": 0.102, "net_credit": 0, "net_position": 0.102, "gross_cost": 0.188, "cost_pct_netback": 0.14, "netback": 71.35, "gross_pct": 0.0014, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 12641292.38, "aei": 0.0124}, {"facility": "Suncor Oil Sands", "type": "Mining & Upgrading", "year": 2024, "intensity": 0.3832, "benchmark": 0.3431, "net_cost": 0.179, "net_credit": 0, "net_position": 0.179, "gross_cost": 0.372, "cost_pct_netback": 0.19, "netback": 96.35, "gross_pct": 0.0019, "carbon_price": 58.33, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18432793.5, "aei": 0.0237}, {"facility": "MEG Christina Lake", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.3362, "benchmark": 0.3476, "net_cost": 0, "net_credit": 0.082, "net_position": -0.082, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 5725560.260000001, "aei": 0.0254}, {"facility": "Leismer", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.403, "benchmark": 0.3756, "net_cost": 0.138, "net_credit": 0, "net_position": 0.138, "gross_cost": 0.255, "cost_pct_netback": 0.19, "netback": 71.35, "gross_pct": 0.0019, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1305378.7099999995, "aei": 0.04}, {"facility": "Kirby", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.4615, "benchmark": 0.2844, "net_cost": 0.887, "net_credit": 0, "net_position": 0.887, "gross_cost": 1.643, "cost_pct_netback": 1.24, "netback": 71.35, "gross_pct": 0.0124, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 3410118.1, "aei": 0.01}, {"facility": "Kearl", "type": "Mining", "year": 2024, "intensity": 0.1947, "benchmark": 0.205, "net_cost": 0, "net_credit": 0.074, "net_position": -0.074, "gross_cost": 0, "cost_pct_netback": 0, "netback": 76.35, "gross_pct": 0.0, "carbon_price": 58.33, "royalty": 0.0705, "is_post_payout": false, "status": "CREDIT", "production": 16728696.3, "aei": 0.0131}, {"facility": "Fort Hills", "type": "Mining", "year": 2024, "intensity": 0.2211, "benchmark": 0.2001, "net_cost": 0.103, "net_credit": 0, "net_position": 0.103, "gross_cost": 0.195, "cost_pct_netback": 0.13, "netback": 76.35, "gross_pct": 0.0013, "carbon_price": 58.33, "royalty": 0.3141, "is_post_payout": true, "status": "DEBIT", "production": 8911935.0, "aei": 0.01}, {"facility": "Jackfish 1,2&3", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.4002, "benchmark": 0.3125, "net_cost": 0.439, "net_credit": 0, "net_position": 0.439, "gross_cost": 0.814, "cost_pct_netback": 0.62, "netback": 71.35, "gross_pct": 0.0062, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 6580527.26, "aei": 0.0131}, {"facility": "Lindbergh", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.5205, "benchmark": 0.3387, "net_cost": 0.912, "net_credit": 0, "net_position": 0.912, "gross_cost": 1.686, "cost_pct_netback": 1.28, "netback": 71.35, "gross_pct": 0.0128, "carbon_price": 58.33, "royalty": 0.2972, "is_post_payout": true, "status": "DEBIT", "production": 969010.1999999998, "aei": 0.01}, {"facility": "Hangingstone Expansion", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.4946, "benchmark": 0.3294, "net_cost": 1.179, "net_credit": 0, "net_position": 1.179, "gross_cost": 1.532, "cost_pct_netback": 1.65, "netback": 71.35, "gross_pct": 0.0165, "carbon_price": 58.33, "royalty": 0.0264, "is_post_payout": false, "status": "DEBIT", "production": 1070010.8199999998, "aei": 0.01}, {"facility": "Hangingstone Enhanced Recovery", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.4912, "benchmark": 0.5541, "net_cost": 0, "net_credit": 0.449, "net_position": -0.449, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 449674.73, "aei": 0.04}, {"facility": "Hangingstone Demo", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.9276, "benchmark": 0.62, "net_cost": 1.54, "net_credit": 0, "net_position": 1.54, "gross_cost": 2.852, "cost_pct_netback": 2.16, "netback": 71.35, "gross_pct": 0.0216, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 221115.89, "aei": 0.0333}, {"facility": "MacKay River Commercial", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.8776, "benchmark": 0.7226, "net_cost": 0.776, "net_credit": 0, "net_position": 0.776, "gross_cost": 1.437, "cost_pct_netback": 1.09, "netback": 71.35, "gross_pct": 0.0109, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 568376.4, "aei": 0.0302}, {"facility": "BlackGold", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.4775, "benchmark": 0.3836, "net_cost": 0.47, "net_credit": 0, "net_position": 0.47, "gross_cost": 0.871, "cost_pct_netback": 0.66, "netback": 71.35, "gross_pct": 0.0066, "carbon_price": 58.33, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 444894.65, "aei": 0.0037}, {"facility": "Sunrise", "type": "In Situ (SAGD)", "year": 2024, "intensity": 0.4579, "benchmark": 0.4921, "net_cost": 0, "net_credit": 0.244, "net_position": -0.244, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 58.33, "royalty": 0.0705, "is_post_payout": false, "status": "CREDIT", "production": 2839288.79, "aei": 0.0265}], "2025": [{"facility": "Christina Lake (Cenovus)", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.2561, "benchmark": 0.2608, "net_cost": 0, "net_credit": 0.03, "net_position": -0.03, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 13769028.2, "aei": 0.0174}, {"facility": "Cold Lake", "type": "In Situ (CSS)", "year": 2025, "intensity": 0.616, "benchmark": 0.4342, "net_cost": 0.806, "net_credit": 0, "net_position": 0.806, "gross_cost": 1.494, "cost_pct_netback": 1.13, "netback": 71.35, "gross_pct": 0.0113, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 7946146.56, "aei": 0}, {"facility": "MacKay River (Suncor)", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.4632, "benchmark": 0.4463, "net_cost": 0.075, "net_credit": 0, "net_position": 0.075, "gross_cost": 0.138, "cost_pct_netback": 0.1, "netback": 71.35, "gross_pct": 0.0011, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1947376.68, "aei": 0.0271}, {"facility": "Mildred Lake & Aurora", "type": "Mining & Upgrading", "year": 2025, "intensity": 0.6732, "benchmark": 0.5812, "net_cost": 0.364, "net_credit": 0, "net_position": 0.364, "gross_cost": 0.755, "cost_pct_netback": 0.38, "netback": 96.35, "gross_pct": 0.0038, "carbon_price": 51.67, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18382530.9, "aei": 0.01}, {"facility": "CNUL Peace River", "type": "In Situ", "year": 2025, "intensity": 0.7716, "benchmark": 0.8868, "net_cost": 0, "net_credit": 0.728, "net_position": -0.728, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 51.67, "royalty": 0.07, "is_post_payout": false, "status": "CREDIT", "production": 219034.3, "aei": 0.04}, {"facility": "CNRL Muskeg/Jackpine/Scotford", "type": "Mining & Upgrading", "year": 2025, "intensity": 0.2847, "benchmark": 0.3337, "net_cost": 0, "net_credit": 0.31, "net_position": -0.31, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 51.67, "royalty": 0.3741, "is_post_payout": true, "status": "CREDIT", "production": 18125819.7, "aei": 0.0161}, {"facility": "Wolf Lake & Primrose", "type": "In Situ", "year": 2025, "intensity": 0.6041, "benchmark": 0.4983, "net_cost": 0.669, "net_credit": 0, "net_position": 0.669, "gross_cost": 0.869, "cost_pct_netback": 0.94, "netback": 71.35, "gross_pct": 0.0094, "carbon_price": 51.67, "royalty": 0.07, "is_post_payout": false, "status": "DEBIT", "production": 4786594.02, "aei": 0.022}, {"facility": "Long Lake", "type": "In Situ (SAGD+Upg)", "year": 2025, "intensity": 0.4615, "benchmark": 0.489, "net_cost": 0, "net_credit": 0.174, "net_position": -0.174, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 51.67, "royalty": 0.07, "is_post_payout": false, "status": "CREDIT", "production": 3845624.11, "aei": 0.01}, {"facility": "Tucker Thermal", "type": "In Situ (CSS)", "year": 2025, "intensity": 0.8458, "benchmark": 0.5234, "net_cost": 1.43, "net_credit": 0, "net_position": 1.43, "gross_cost": 2.649, "cost_pct_netback": 2.0, "netback": 71.35, "gross_pct": 0.02, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1065634.2399999998, "aei": 0.01}, {"facility": "Connacher/Great Divide", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.4854, "benchmark": 0.4944, "net_cost": 0, "net_credit": 0.057, "net_position": -0.057, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 888953.1399999999, "aei": 0.04}, {"facility": "Horizon", "type": "Mining & Upgrading", "year": 2025, "intensity": 0.3481, "benchmark": 0.4158, "net_cost": 0, "net_credit": 0.428, "net_position": -0.428, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 51.67, "royalty": 0.3631, "is_post_payout": true, "status": "CREDIT", "production": 13724260.9, "aei": 0.0043}, {"facility": "Orion", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.4905, "benchmark": 0.4135, "net_cost": 0.342, "net_credit": 0, "net_position": 0.342, "gross_cost": 0.633, "cost_pct_netback": 0.48, "netback": 71.35, "gross_pct": 0.0048, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1202240.6499999997, "aei": 0.01}, {"facility": "Surmont", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.4126, "benchmark": 0.3865, "net_cost": 0.165, "net_credit": 0, "net_position": 0.165, "gross_cost": 0.214, "cost_pct_netback": 0.23, "netback": 71.35, "gross_pct": 0.0023, "carbon_price": 51.67, "royalty": 0.0708, "is_post_payout": false, "status": "DEBIT", "production": 7402729.460000001, "aei": 0.0034}, {"facility": "Foster Creek", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.2887, "benchmark": 0.3002, "net_cost": 0, "net_credit": 0.073, "net_position": -0.073, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 10628774.689999998, "aei": 0.04}, {"facility": "Firebag", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.3874, "benchmark": 0.3645, "net_cost": 0.101, "net_credit": 0, "net_position": 0.101, "gross_cost": 0.188, "cost_pct_netback": 0.14, "netback": 71.35, "gross_pct": 0.0014, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 12641292.38, "aei": 0.0124}, {"facility": "Suncor Oil Sands", "type": "Mining & Upgrading", "year": 2025, "intensity": 0.3741, "benchmark": 0.3362, "net_cost": 0.15, "net_credit": 0, "net_position": 0.15, "gross_cost": 0.311, "cost_pct_netback": 0.16, "netback": 96.35, "gross_pct": 0.0016, "carbon_price": 51.67, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18432793.5, "aei": 0.0237}, {"facility": "MEG Christina Lake", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.3276, "benchmark": 0.3406, "net_cost": 0, "net_credit": 0.082, "net_position": -0.082, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 5725560.260000001, "aei": 0.0254}, {"facility": "Leismer", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.3869, "benchmark": 0.368, "net_cost": 0.084, "net_credit": 0, "net_position": 0.084, "gross_cost": 0.155, "cost_pct_netback": 0.12, "netback": 71.35, "gross_pct": 0.0012, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1305378.7099999995, "aei": 0.04}, {"facility": "Kirby", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.4569, "benchmark": 0.2787, "net_cost": 0.79, "net_credit": 0, "net_position": 0.79, "gross_cost": 1.464, "cost_pct_netback": 1.11, "netback": 71.35, "gross_pct": 0.0111, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 3410118.1, "aei": 0.01}, {"facility": "Kearl", "type": "Mining", "year": 2025, "intensity": 0.1921, "benchmark": 0.2009, "net_cost": 0, "net_credit": 0.056, "net_position": -0.056, "gross_cost": 0, "cost_pct_netback": 0, "netback": 76.35, "gross_pct": 0.0, "carbon_price": 51.67, "royalty": 0.0705, "is_post_payout": false, "status": "CREDIT", "production": 16728696.3, "aei": 0.0131}, {"facility": "Fort Hills", "type": "Mining", "year": 2025, "intensity": 0.2189, "benchmark": 0.1961, "net_cost": 0.099, "net_credit": 0, "net_position": 0.099, "gross_cost": 0.187, "cost_pct_netback": 0.13, "netback": 76.35, "gross_pct": 0.0013, "carbon_price": 51.67, "royalty": 0.3141, "is_post_payout": true, "status": "DEBIT", "production": 8911935.0, "aei": 0.01}, {"facility": "Jackfish 1,2&3", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.395, "benchmark": 0.3062, "net_cost": 0.393, "net_credit": 0, "net_position": 0.393, "gross_cost": 0.729, "cost_pct_netback": 0.55, "netback": 71.35, "gross_pct": 0.0055, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 6580527.26, "aei": 0.0131}, {"facility": "Lindbergh", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.5153, "benchmark": 0.3319, "net_cost": 0.815, "net_credit": 0, "net_position": 0.815, "gross_cost": 1.506, "cost_pct_netback": 1.14, "netback": 71.35, "gross_pct": 0.0114, "carbon_price": 51.67, "royalty": 0.2972, "is_post_payout": true, "status": "DEBIT", "production": 969010.1999999998, "aei": 0.01}, {"facility": "Hangingstone Expansion", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.4896, "benchmark": 0.3228, "net_cost": 1.055, "net_credit": 0, "net_position": 1.055, "gross_cost": 1.37, "cost_pct_netback": 1.48, "netback": 71.35, "gross_pct": 0.0148, "carbon_price": 51.67, "royalty": 0.0264, "is_post_payout": false, "status": "DEBIT", "production": 1070010.8199999998, "aei": 0.01}, {"facility": "Hangingstone Enhanced Recovery", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.4715, "benchmark": 0.543, "net_cost": 0, "net_credit": 0.452, "net_position": -0.452, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 449674.73, "aei": 0.04}, {"facility": "Hangingstone Demo", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.8967, "benchmark": 0.6076, "net_cost": 1.282, "net_credit": 0, "net_position": 1.282, "gross_cost": 2.375, "cost_pct_netback": 1.8, "netback": 71.35, "gross_pct": 0.018, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 221115.89, "aei": 0.0333}, {"facility": "MacKay River Commercial", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.851, "benchmark": 0.7081, "net_cost": 0.634, "net_credit": 0, "net_position": 0.634, "gross_cost": 1.174, "cost_pct_netback": 0.89, "netback": 71.35, "gross_pct": 0.0089, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 568376.4, "aei": 0.0302}, {"facility": "BlackGold", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.4757, "benchmark": 0.3759, "net_cost": 0.442, "net_credit": 0, "net_position": 0.442, "gross_cost": 0.82, "cost_pct_netback": 0.62, "netback": 71.35, "gross_pct": 0.0062, "carbon_price": 51.67, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 444894.65, "aei": 0.0037}, {"facility": "Sunrise", "type": "In Situ (SAGD)", "year": 2025, "intensity": 0.4458, "benchmark": 0.4822, "net_cost": 0, "net_credit": 0.231, "net_position": -0.231, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 51.67, "royalty": 0.0705, "is_post_payout": false, "status": "CREDIT", "production": 2839288.79, "aei": 0.0265}], "2026": [{"facility": "Christina Lake (Cenovus)", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.2516, "benchmark": 0.2556, "net_cost": 0, "net_credit": 0.022, "net_position": -0.022, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 13769028.2, "aei": 0.0174}, {"facility": "Cold Lake", "type": "In Situ (CSS)", "year": 2026, "intensity": 0.616, "benchmark": 0.4255, "net_cost": 0.736, "net_credit": 0, "net_position": 0.736, "gross_cost": 1.363, "cost_pct_netback": 1.03, "netback": 71.35, "gross_pct": 0.0103, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 7946146.56, "aei": 0}, {"facility": "MacKay River (Suncor)", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.4506, "benchmark": 0.4374, "net_cost": 0.051, "net_credit": 0, "net_position": 0.051, "gross_cost": 0.095, "cost_pct_netback": 0.07, "netback": 71.35, "gross_pct": 0.0007, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1947376.68, "aei": 0.0271}, {"facility": "Mildred Lake & Aurora", "type": "Mining & Upgrading", "year": 2026, "intensity": 0.6665, "benchmark": 0.5696, "net_cost": 0.334, "net_credit": 0, "net_position": 0.334, "gross_cost": 0.693, "cost_pct_netback": 0.35, "netback": 96.35, "gross_pct": 0.0035, "carbon_price": 45.0, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18382530.9, "aei": 0.01}, {"facility": "CNUL Peace River", "type": "In Situ", "year": 2026, "intensity": 0.7408, "benchmark": 0.869, "net_cost": 0, "net_credit": 0.707, "net_position": -0.707, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 45.0, "royalty": 0.07, "is_post_payout": false, "status": "CREDIT", "production": 219034.3, "aei": 0.04}, {"facility": "CNRL Muskeg/Jackpine/Scotford", "type": "Mining & Upgrading", "year": 2026, "intensity": 0.2801, "benchmark": 0.327, "net_cost": 0, "net_credit": 0.258, "net_position": -0.258, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 45.0, "royalty": 0.3741, "is_post_payout": true, "status": "CREDIT", "production": 18125819.7, "aei": 0.0161}, {"facility": "Wolf Lake & Primrose", "type": "In Situ", "year": 2026, "intensity": 0.5908, "benchmark": 0.4884, "net_cost": 0.564, "net_credit": 0, "net_position": 0.564, "gross_cost": 0.733, "cost_pct_netback": 0.79, "netback": 71.35, "gross_pct": 0.0079, "carbon_price": 45.0, "royalty": 0.07, "is_post_payout": false, "status": "DEBIT", "production": 4786594.02, "aei": 0.022}, {"facility": "Long Lake", "type": "In Situ (SAGD+Upg)", "year": 2026, "intensity": 0.4569, "benchmark": 0.4793, "net_cost": 0, "net_credit": 0.123, "net_position": -0.123, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 45.0, "royalty": 0.07, "is_post_payout": false, "status": "CREDIT", "production": 3845624.11, "aei": 0.01}, {"facility": "Tucker Thermal", "type": "In Situ (CSS)", "year": 2026, "intensity": 0.8374, "benchmark": 0.5129, "net_cost": 1.253, "net_credit": 0, "net_position": 1.253, "gross_cost": 2.321, "cost_pct_netback": 1.76, "netback": 71.35, "gross_pct": 0.0176, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1065634.2399999998, "aei": 0.01}, {"facility": "Connacher/Great Divide", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.466, "benchmark": 0.4845, "net_cost": 0, "net_credit": 0.102, "net_position": -0.102, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 888953.1399999999, "aei": 0.04}, {"facility": "Horizon", "type": "Mining & Upgrading", "year": 2026, "intensity": 0.3466, "benchmark": 0.4075, "net_cost": 0, "net_credit": 0.335, "net_position": -0.335, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 45.0, "royalty": 0.3631, "is_post_payout": true, "status": "CREDIT", "production": 13724260.9, "aei": 0.0043}, {"facility": "Orion", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.4856, "benchmark": 0.4052, "net_cost": 0.311, "net_credit": 0, "net_position": 0.311, "gross_cost": 0.575, "cost_pct_netback": 0.44, "netback": 71.35, "gross_pct": 0.0044, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1202240.6499999997, "aei": 0.01}, {"facility": "Surmont", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.4112, "benchmark": 0.3788, "net_cost": 0.179, "net_credit": 0, "net_position": 0.179, "gross_cost": 0.232, "cost_pct_netback": 0.25, "netback": 71.35, "gross_pct": 0.0025, "carbon_price": 45.0, "royalty": 0.0708, "is_post_payout": false, "status": "DEBIT", "production": 7402729.460000001, "aei": 0.0034}, {"facility": "Foster Creek", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.2771, "benchmark": 0.2942, "net_cost": 0, "net_credit": 0.094, "net_position": -0.094, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 10628774.689999998, "aei": 0.04}, {"facility": "Firebag", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.3826, "benchmark": 0.3572, "net_cost": 0.098, "net_credit": 0, "net_position": 0.098, "gross_cost": 0.181, "cost_pct_netback": 0.14, "netback": 71.35, "gross_pct": 0.0014, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 12641292.38, "aei": 0.0124}, {"facility": "Suncor Oil Sands", "type": "Mining & Upgrading", "year": 2026, "intensity": 0.3652, "benchmark": 0.3295, "net_cost": 0.123, "net_credit": 0, "net_position": 0.123, "gross_cost": 0.256, "cost_pct_netback": 0.13, "netback": 96.35, "gross_pct": 0.0013, "carbon_price": 45.0, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18432793.5, "aei": 0.0237}, {"facility": "MEG Christina Lake", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.3193, "benchmark": 0.3338, "net_cost": 0, "net_credit": 0.08, "net_position": -0.08, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 5725560.260000001, "aei": 0.0254}, {"facility": "Leismer", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.3714, "benchmark": 0.3607, "net_cost": 0.042, "net_credit": 0, "net_position": 0.042, "gross_cost": 0.077, "cost_pct_netback": 0.06, "netback": 71.35, "gross_pct": 0.0006, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1305378.7099999995, "aei": 0.04}, {"facility": "Kirby", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.4523, "benchmark": 0.2731, "net_cost": 0.692, "net_credit": 0, "net_position": 0.692, "gross_cost": 1.282, "cost_pct_netback": 0.97, "netback": 71.35, "gross_pct": 0.0097, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 3410118.1, "aei": 0.01}, {"facility": "Kearl", "type": "Mining", "year": 2026, "intensity": 0.1896, "benchmark": 0.1969, "net_cost": 0, "net_credit": 0.04, "net_position": -0.04, "gross_cost": 0, "cost_pct_netback": 0, "netback": 76.35, "gross_pct": 0.0, "carbon_price": 45.0, "royalty": 0.0705, "is_post_payout": false, "status": "CREDIT", "production": 16728696.3, "aei": 0.0131}, {"facility": "Fort Hills", "type": "Mining", "year": 2026, "intensity": 0.2167, "benchmark": 0.1922, "net_cost": 0.093, "net_credit": 0, "net_position": 0.093, "gross_cost": 0.175, "cost_pct_netback": 0.12, "netback": 76.35, "gross_pct": 0.0012, "carbon_price": 45.0, "royalty": 0.3141, "is_post_payout": true, "status": "DEBIT", "production": 8911935.0, "aei": 0.01}, {"facility": "Jackfish 1,2&3", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.3898, "benchmark": 0.3001, "net_cost": 0.346, "net_credit": 0, "net_position": 0.346, "gross_cost": 0.642, "cost_pct_netback": 0.49, "netback": 71.35, "gross_pct": 0.0048, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 6580527.26, "aei": 0.0131}, {"facility": "Lindbergh", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.5101, "benchmark": 0.3253, "net_cost": 0.716, "net_credit": 0, "net_position": 0.716, "gross_cost": 1.323, "cost_pct_netback": 1.0, "netback": 71.35, "gross_pct": 0.01, "carbon_price": 45.0, "royalty": 0.2972, "is_post_payout": true, "status": "DEBIT", "production": 969010.1999999998, "aei": 0.01}, {"facility": "Hangingstone Expansion", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.4847, "benchmark": 0.3164, "net_cost": 0.927, "net_credit": 0, "net_position": 0.927, "gross_cost": 1.204, "cost_pct_netback": 1.3, "netback": 71.35, "gross_pct": 0.013, "carbon_price": 45.0, "royalty": 0.0264, "is_post_payout": false, "status": "DEBIT", "production": 1070010.8199999998, "aei": 0.01}, {"facility": "Hangingstone Enhanced Recovery", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.4526, "benchmark": 0.5321, "net_cost": 0, "net_credit": 0.438, "net_position": -0.438, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 449674.73, "aei": 0.04}, {"facility": "Hangingstone Demo", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.8668, "benchmark": 0.5955, "net_cost": 1.048, "net_credit": 0, "net_position": 1.048, "gross_cost": 1.941, "cost_pct_netback": 1.47, "netback": 71.35, "gross_pct": 0.0147, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 221115.89, "aei": 0.0333}, {"facility": "MacKay River Commercial", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.8253, "benchmark": 0.6939, "net_cost": 0.507, "net_credit": 0, "net_position": 0.507, "gross_cost": 0.94, "cost_pct_netback": 0.71, "netback": 71.35, "gross_pct": 0.0071, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 568376.4, "aei": 0.0302}, {"facility": "BlackGold", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.474, "benchmark": 0.3684, "net_cost": 0.408, "net_credit": 0, "net_position": 0.408, "gross_cost": 0.755, "cost_pct_netback": 0.57, "netback": 71.35, "gross_pct": 0.0057, "carbon_price": 45.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 444894.65, "aei": 0.0037}, {"facility": "Sunrise", "type": "In Situ (SAGD)", "year": 2026, "intensity": 0.434, "benchmark": 0.4726, "net_cost": 0, "net_credit": 0.213, "net_position": -0.213, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 45.0, "royalty": 0.0705, "is_post_payout": false, "status": "CREDIT", "production": 2839288.79, "aei": 0.0265}], "2027": [{"facility": "Christina Lake (Cenovus)", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.2472, "benchmark": 0.2505, "net_cost": 0, "net_credit": 0.026, "net_position": -0.026, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 13769028.2, "aei": 0.0174}, {"facility": "Cold Lake", "type": "In Situ (CSS)", "year": 2027, "intensity": 0.616, "benchmark": 0.417, "net_cost": 1.131, "net_credit": 0, "net_position": 1.131, "gross_cost": 2.096, "cost_pct_netback": 1.59, "netback": 71.35, "gross_pct": 0.0159, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 7946146.56, "aei": 0}, {"facility": "MacKay River (Suncor)", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.4384, "benchmark": 0.4287, "net_cost": 0.055, "net_credit": 0, "net_position": 0.055, "gross_cost": 0.103, "cost_pct_netback": 0.08, "netback": 71.35, "gross_pct": 0.0008, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1947376.68, "aei": 0.0271}, {"facility": "Mildred Lake & Aurora", "type": "Mining & Upgrading", "year": 2027, "intensity": 0.6598, "benchmark": 0.5582, "net_cost": 0.516, "net_credit": 0, "net_position": 0.516, "gross_cost": 1.07, "cost_pct_netback": 0.54, "netback": 96.35, "gross_pct": 0.0054, "carbon_price": 66.25, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18382530.9, "aei": 0.01}, {"facility": "CNUL Peace River", "type": "In Situ", "year": 2027, "intensity": 0.7111, "benchmark": 0.8517, "net_cost": 0, "net_credit": 1.14, "net_position": -1.14, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 66.25, "royalty": 0.07, "is_post_payout": false, "status": "CREDIT", "production": 219034.3, "aei": 0.04}, {"facility": "CNRL Muskeg/Jackpine/Scotford", "type": "Mining & Upgrading", "year": 2027, "intensity": 0.2756, "benchmark": 0.3204, "net_cost": 0, "net_credit": 0.364, "net_position": -0.364, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 66.25, "royalty": 0.3741, "is_post_payout": true, "status": "CREDIT", "production": 18125819.7, "aei": 0.0161}, {"facility": "Wolf Lake & Primrose", "type": "In Situ", "year": 2027, "intensity": 0.5778, "benchmark": 0.4786, "net_cost": 0.804, "net_credit": 0, "net_position": 0.804, "gross_cost": 1.044, "cost_pct_netback": 1.13, "netback": 71.35, "gross_pct": 0.0113, "carbon_price": 66.25, "royalty": 0.07, "is_post_payout": false, "status": "DEBIT", "production": 4786594.02, "aei": 0.022}, {"facility": "Long Lake", "type": "In Situ (SAGD+Upg)", "year": 2027, "intensity": 0.4523, "benchmark": 0.4697, "net_cost": 0, "net_credit": 0.141, "net_position": -0.141, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 3845624.11, "aei": 0.01}, {"facility": "Tucker Thermal", "type": "In Situ (CSS)", "year": 2027, "intensity": 0.829, "benchmark": 0.5027, "net_cost": 1.855, "net_credit": 0, "net_position": 1.855, "gross_cost": 3.437, "cost_pct_netback": 2.6, "netback": 71.35, "gross_pct": 0.026, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1065634.2399999998, "aei": 0.01}, {"facility": "Connacher/Great Divide", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.4474, "benchmark": 0.4748, "net_cost": 0, "net_credit": 0.223, "net_position": -0.223, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 888953.1399999999, "aei": 0.04}, {"facility": "Horizon", "type": "Mining & Upgrading", "year": 2027, "intensity": 0.3451, "benchmark": 0.3993, "net_cost": 0, "net_credit": 0.439, "net_position": -0.439, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 66.25, "royalty": 0.3631, "is_post_payout": true, "status": "CREDIT", "production": 13724260.9, "aei": 0.0043}, {"facility": "Orion", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.4808, "benchmark": 0.3971, "net_cost": 0.476, "net_credit": 0, "net_position": 0.476, "gross_cost": 0.881, "cost_pct_netback": 0.67, "netback": 71.35, "gross_pct": 0.0067, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1202240.6499999997, "aei": 0.01}, {"facility": "Surmont", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.4098, "benchmark": 0.3712, "net_cost": 0.219, "net_credit": 0, "net_position": 0.219, "gross_cost": 0.407, "cost_pct_netback": 0.31, "netback": 71.35, "gross_pct": 0.0031, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 7402729.460000001, "aei": 0.0034}, {"facility": "Foster Creek", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.266, "benchmark": 0.2883, "net_cost": 0, "net_credit": 0.18, "net_position": -0.18, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 10628774.689999998, "aei": 0.04}, {"facility": "Firebag", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.3778, "benchmark": 0.3501, "net_cost": 0.158, "net_credit": 0, "net_position": 0.158, "gross_cost": 0.292, "cost_pct_netback": 0.22, "netback": 71.35, "gross_pct": 0.0022, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 12641292.38, "aei": 0.0124}, {"facility": "Suncor Oil Sands", "type": "Mining & Upgrading", "year": 2027, "intensity": 0.3566, "benchmark": 0.3229, "net_cost": 0.171, "net_credit": 0, "net_position": 0.171, "gross_cost": 0.355, "cost_pct_netback": 0.18, "netback": 96.35, "gross_pct": 0.0018, "carbon_price": 66.25, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18432793.5, "aei": 0.0237}, {"facility": "MEG Christina Lake", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.3112, "benchmark": 0.3271, "net_cost": 0, "net_credit": 0.13, "net_position": -0.13, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 5725560.260000001, "aei": 0.0254}, {"facility": "Leismer", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.3566, "benchmark": 0.3535, "net_cost": 0.018, "net_credit": 0, "net_position": 0.018, "gross_cost": 0.033, "cost_pct_netback": 0.02, "netback": 71.35, "gross_pct": 0.0003, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1305378.7099999995, "aei": 0.04}, {"facility": "Kirby", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.4478, "benchmark": 0.2676, "net_cost": 1.024, "net_credit": 0, "net_position": 1.024, "gross_cost": 1.897, "cost_pct_netback": 1.44, "netback": 71.35, "gross_pct": 0.0144, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 3410118.1, "aei": 0.01}, {"facility": "Kearl", "type": "Mining", "year": 2027, "intensity": 0.1871, "benchmark": 0.193, "net_cost": 0, "net_credit": 0.047, "net_position": -0.047, "gross_cost": 0, "cost_pct_netback": 0, "netback": 76.35, "gross_pct": 0.0, "carbon_price": 66.25, "royalty": 0.3141, "is_post_payout": true, "status": "CREDIT", "production": 16728696.3, "aei": 0.0131}, {"facility": "Fort Hills", "type": "Mining", "year": 2027, "intensity": 0.2145, "benchmark": 0.1883, "net_cost": 0.146, "net_credit": 0, "net_position": 0.146, "gross_cost": 0.276, "cost_pct_netback": 0.19, "netback": 76.35, "gross_pct": 0.0019, "carbon_price": 66.25, "royalty": 0.3141, "is_post_payout": true, "status": "DEBIT", "production": 8911935.0, "aei": 0.01}, {"facility": "Jackfish 1,2&3", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.3847, "benchmark": 0.2941, "net_cost": 0.515, "net_credit": 0, "net_position": 0.515, "gross_cost": 0.954, "cost_pct_netback": 0.72, "netback": 71.35, "gross_pct": 0.0072, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 6580527.26, "aei": 0.0131}, {"facility": "Lindbergh", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.505, "benchmark": 0.3188, "net_cost": 1.062, "net_credit": 0, "net_position": 1.062, "gross_cost": 1.962, "cost_pct_netback": 1.49, "netback": 71.35, "gross_pct": 0.0149, "carbon_price": 66.25, "royalty": 0.2972, "is_post_payout": true, "status": "DEBIT", "production": 969010.1999999998, "aei": 0.01}, {"facility": "Hangingstone Expansion", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.4799, "benchmark": 0.3101, "net_cost": 1.377, "net_credit": 0, "net_position": 1.377, "gross_cost": 1.789, "cost_pct_netback": 1.93, "netback": 71.35, "gross_pct": 0.0193, "carbon_price": 66.25, "royalty": 0.0264, "is_post_payout": false, "status": "DEBIT", "production": 1070010.8199999998, "aei": 0.01}, {"facility": "Hangingstone Enhanced Recovery", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.4345, "benchmark": 0.5215, "net_cost": 0, "net_credit": 0.705, "net_position": -0.705, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 449674.73, "aei": 0.04}, {"facility": "Hangingstone Demo", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.8379, "benchmark": 0.5835, "net_cost": 1.446, "net_credit": 0, "net_position": 1.446, "gross_cost": 2.679, "cost_pct_netback": 2.03, "netback": 71.35, "gross_pct": 0.0203, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 221115.89, "aei": 0.0333}, {"facility": "MacKay River Commercial", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.8004, "benchmark": 0.6801, "net_cost": 0.684, "net_credit": 0, "net_position": 0.684, "gross_cost": 1.267, "cost_pct_netback": 0.96, "netback": 71.35, "gross_pct": 0.0096, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 568376.4, "aei": 0.0302}, {"facility": "BlackGold", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.4722, "benchmark": 0.3611, "net_cost": 0.632, "net_credit": 0, "net_position": 0.632, "gross_cost": 1.171, "cost_pct_netback": 0.89, "netback": 71.35, "gross_pct": 0.0089, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 444894.65, "aei": 0.0037}, {"facility": "Sunrise", "type": "In Situ (SAGD)", "year": 2027, "intensity": 0.4225, "benchmark": 0.4631, "net_cost": 0, "net_credit": 0.33, "net_position": -0.33, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 66.25, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 2839288.79, "aei": 0.0265}], "2028": [{"facility": "Christina Lake (Cenovus)", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.2429, "benchmark": 0.2455, "net_cost": 0, "net_credit": 0.027, "net_position": -0.027, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 13769028.2, "aei": 0.0174}, {"facility": "Cold Lake", "type": "In Situ (CSS)", "year": 2028, "intensity": 0.616, "benchmark": 0.4087, "net_cost": 1.556, "net_credit": 0, "net_position": 1.556, "gross_cost": 2.884, "cost_pct_netback": 2.18, "netback": 71.35, "gross_pct": 0.0218, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 7946146.56, "aei": 0}, {"facility": "MacKay River (Suncor)", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.4265, "benchmark": 0.4201, "net_cost": 0.048, "net_credit": 0, "net_position": 0.048, "gross_cost": 0.089, "cost_pct_netback": 0.07, "netback": 71.35, "gross_pct": 0.0007, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1947376.68, "aei": 0.0271}, {"facility": "Mildred Lake & Aurora", "type": "Mining & Upgrading", "year": 2028, "intensity": 0.6532, "benchmark": 0.547, "net_cost": 0.712, "net_credit": 0, "net_position": 0.712, "gross_cost": 1.477, "cost_pct_netback": 0.74, "netback": 96.35, "gross_pct": 0.0074, "carbon_price": 87.5, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18382530.9, "aei": 0.01}, {"facility": "CNUL Peace River", "type": "In Situ", "year": 2028, "intensity": 0.6827, "benchmark": 0.8346, "net_cost": 0, "net_credit": 1.628, "net_position": -1.628, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 219034.3, "aei": 0.04}, {"facility": "CNRL Muskeg/Jackpine/Scotford", "type": "Mining & Upgrading", "year": 2028, "intensity": 0.2712, "benchmark": 0.314, "net_cost": 0, "net_credit": 0.459, "net_position": -0.459, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.3741, "is_post_payout": true, "status": "CREDIT", "production": 18125819.7, "aei": 0.0161}, {"facility": "Wolf Lake & Primrose", "type": "In Situ", "year": 2028, "intensity": 0.565, "benchmark": 0.469, "net_cost": 0.721, "net_credit": 0, "net_position": 0.721, "gross_cost": 1.335, "cost_pct_netback": 1.01, "netback": 71.35, "gross_pct": 0.0101, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 4786594.02, "aei": 0.022}, {"facility": "Long Lake", "type": "In Situ (SAGD+Upg)", "year": 2028, "intensity": 0.4478, "benchmark": 0.4603, "net_cost": 0, "net_credit": 0.134, "net_position": -0.134, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 3845624.11, "aei": 0.01}, {"facility": "Tucker Thermal", "type": "In Situ (CSS)", "year": 2028, "intensity": 0.8207, "benchmark": 0.4926, "net_cost": 2.464, "net_credit": 0, "net_position": 2.464, "gross_cost": 4.564, "cost_pct_netback": 3.45, "netback": 71.35, "gross_pct": 0.0345, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1065634.2399999998, "aei": 0.01}, {"facility": "Connacher/Great Divide", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.4295, "benchmark": 0.4653, "net_cost": 0, "net_credit": 0.384, "net_position": -0.384, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 888953.1399999999, "aei": 0.04}, {"facility": "Horizon", "type": "Mining & Upgrading", "year": 2028, "intensity": 0.3437, "benchmark": 0.3913, "net_cost": 0, "net_credit": 0.511, "net_position": -0.511, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.3631, "is_post_payout": true, "status": "CREDIT", "production": 13724260.9, "aei": 0.0043}, {"facility": "Orion", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.476, "benchmark": 0.3892, "net_cost": 0.652, "net_credit": 0, "net_position": 0.652, "gross_cost": 1.208, "cost_pct_netback": 0.91, "netback": 71.35, "gross_pct": 0.0091, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1202240.6499999997, "aei": 0.01}, {"facility": "Surmont", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.4084, "benchmark": 0.3638, "net_cost": 0.335, "net_credit": 0, "net_position": 0.335, "gross_cost": 0.621, "cost_pct_netback": 0.47, "netback": 71.35, "gross_pct": 0.0047, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 7402729.460000001, "aei": 0.0034}, {"facility": "Foster Creek", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.2554, "benchmark": 0.2825, "net_cost": 0, "net_credit": 0.29, "net_position": -0.29, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 10628774.689999998, "aei": 0.04}, {"facility": "Firebag", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.3731, "benchmark": 0.3431, "net_cost": 0.226, "net_credit": 0, "net_position": 0.226, "gross_cost": 0.418, "cost_pct_netback": 0.32, "netback": 71.35, "gross_pct": 0.0032, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 12641292.38, "aei": 0.0124}, {"facility": "Suncor Oil Sands", "type": "Mining & Upgrading", "year": 2028, "intensity": 0.3481, "benchmark": 0.3164, "net_cost": 0.212, "net_credit": 0, "net_position": 0.212, "gross_cost": 0.441, "cost_pct_netback": 0.22, "netback": 96.35, "gross_pct": 0.0022, "carbon_price": 87.5, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18432793.5, "aei": 0.0237}, {"facility": "MEG Christina Lake", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.3032, "benchmark": 0.3206, "net_cost": 0, "net_credit": 0.186, "net_position": -0.186, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 5725560.260000001, "aei": 0.0254}, {"facility": "Leismer", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.3423, "benchmark": 0.3464, "net_cost": 0, "net_credit": 0.044, "net_position": -0.044, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 1305378.7099999995, "aei": 0.04}, {"facility": "Kirby", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.4433, "benchmark": 0.2623, "net_cost": 1.359, "net_credit": 0, "net_position": 1.359, "gross_cost": 2.518, "cost_pct_netback": 1.9, "netback": 71.35, "gross_pct": 0.019, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 3410118.1, "aei": 0.01}, {"facility": "Kearl", "type": "Mining", "year": 2028, "intensity": 0.1847, "benchmark": 0.1891, "net_cost": 0, "net_credit": 0.047, "net_position": -0.047, "gross_cost": 0, "cost_pct_netback": 0, "netback": 76.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.3141, "is_post_payout": true, "status": "CREDIT", "production": 16728696.3, "aei": 0.0131}, {"facility": "Fort Hills", "type": "Mining", "year": 2028, "intensity": 0.2124, "benchmark": 0.1846, "net_cost": 0.204, "net_credit": 0, "net_position": 0.204, "gross_cost": 0.387, "cost_pct_netback": 0.27, "netback": 76.35, "gross_pct": 0.0027, "carbon_price": 87.5, "royalty": 0.3141, "is_post_payout": true, "status": "DEBIT", "production": 8911935.0, "aei": 0.01}, {"facility": "Jackfish 1,2&3", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.3797, "benchmark": 0.2882, "net_cost": 0.687, "net_credit": 0, "net_position": 0.687, "gross_cost": 1.272, "cost_pct_netback": 0.96, "netback": 71.35, "gross_pct": 0.0096, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 6580527.26, "aei": 0.0131}, {"facility": "Lindbergh", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.5, "benchmark": 0.3124, "net_cost": 1.412, "net_credit": 0, "net_position": 1.412, "gross_cost": 2.61, "cost_pct_netback": 1.98, "netback": 71.35, "gross_pct": 0.0198, "carbon_price": 87.5, "royalty": 0.2972, "is_post_payout": true, "status": "DEBIT", "production": 969010.1999999998, "aei": 0.01}, {"facility": "Hangingstone Expansion", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.4751, "benchmark": 0.3039, "net_cost": 1.286, "net_credit": 0, "net_position": 1.286, "gross_cost": 2.382, "cost_pct_netback": 1.8, "netback": 71.35, "gross_pct": 0.018, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1070010.8199999998, "aei": 0.01}, {"facility": "Hangingstone Enhanced Recovery", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.4172, "benchmark": 0.5111, "net_cost": 0, "net_credit": 1.006, "net_position": -1.006, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 449674.73, "aei": 0.04}, {"facility": "Hangingstone Demo", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.81, "benchmark": 0.5719, "net_cost": 1.788, "net_credit": 0, "net_position": 1.788, "gross_cost": 3.313, "cost_pct_netback": 2.51, "netback": 71.35, "gross_pct": 0.0251, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 221115.89, "aei": 0.0333}, {"facility": "MacKay River Commercial", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.7762, "benchmark": 0.6665, "net_cost": 0.824, "net_credit": 0, "net_position": 0.824, "gross_cost": 1.526, "cost_pct_netback": 1.15, "netback": 71.35, "gross_pct": 0.0115, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 568376.4, "aei": 0.0302}, {"facility": "BlackGold", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.4705, "benchmark": 0.3538, "net_cost": 0.876, "net_credit": 0, "net_position": 0.876, "gross_cost": 1.622, "cost_pct_netback": 1.23, "netback": 71.35, "gross_pct": 0.0123, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 444894.65, "aei": 0.0037}, {"facility": "Sunrise", "type": "In Situ (SAGD)", "year": 2028, "intensity": 0.4113, "benchmark": 0.4539, "net_cost": 0, "net_credit": 0.456, "net_position": -0.456, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 87.5, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 2839288.79, "aei": 0.0265}], "2029": [{"facility": "Christina Lake (Cenovus)", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.2387, "benchmark": 0.2357, "net_cost": 0.028, "net_credit": 0, "net_position": 0.028, "gross_cost": 0.053, "cost_pct_netback": 0.04, "netback": 71.35, "gross_pct": 0.0004, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 13769028.2, "aei": 0.0174}, {"facility": "Cold Lake", "type": "In Situ (CSS)", "year": 2029, "intensity": 0.6159, "benchmark": 0.3923, "net_cost": 2.087, "net_credit": 0, "net_position": 2.087, "gross_cost": 3.866, "cost_pct_netback": 2.92, "netback": 71.35, "gross_pct": 0.0293, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 7946146.56, "aei": 0}, {"facility": "MacKay River (Suncor)", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.415, "benchmark": 0.4033, "net_cost": 0.109, "net_credit": 0, "net_position": 0.109, "gross_cost": 0.202, "cost_pct_netback": 0.15, "netback": 71.35, "gross_pct": 0.0015, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1947376.68, "aei": 0.0271}, {"facility": "Mildred Lake & Aurora", "type": "Mining & Upgrading", "year": 2029, "intensity": 0.6467, "benchmark": 0.5252, "net_cost": 1.012, "net_credit": 0, "net_position": 1.012, "gross_cost": 2.101, "cost_pct_netback": 1.05, "netback": 96.35, "gross_pct": 0.0105, "carbon_price": 108.75, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18382530.9, "aei": 0.01}, {"facility": "CNUL Peace River", "type": "In Situ", "year": 2029, "intensity": 0.6554, "benchmark": 0.8012, "net_cost": 0, "net_credit": 1.942, "net_position": -1.942, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 219034.3, "aei": 0.04}, {"facility": "CNRL Muskeg/Jackpine/Scotford", "type": "Mining & Upgrading", "year": 2029, "intensity": 0.2668, "benchmark": 0.3015, "net_cost": 0, "net_credit": 0.462, "net_position": -0.462, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 108.75, "royalty": 0.3741, "is_post_payout": true, "status": "CREDIT", "production": 18125819.7, "aei": 0.0161}, {"facility": "Wolf Lake & Primrose", "type": "In Situ", "year": 2029, "intensity": 0.5526, "benchmark": 0.4503, "net_cost": 0.955, "net_credit": 0, "net_position": 0.955, "gross_cost": 1.769, "cost_pct_netback": 1.34, "netback": 71.35, "gross_pct": 0.0134, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 4786594.02, "aei": 0.022}, {"facility": "Long Lake", "type": "In Situ (SAGD+Upg)", "year": 2029, "intensity": 0.4433, "benchmark": 0.4419, "net_cost": 0.014, "net_credit": 0, "net_position": 0.014, "gross_cost": 0.025, "cost_pct_netback": 0.02, "netback": 71.35, "gross_pct": 0.0002, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 3845624.11, "aei": 0.01}, {"facility": "Tucker Thermal", "type": "In Situ (CSS)", "year": 2029, "intensity": 0.8125, "benchmark": 0.4729, "net_cost": 3.169, "net_credit": 0, "net_position": 3.169, "gross_cost": 5.872, "cost_pct_netback": 4.44, "netback": 71.35, "gross_pct": 0.0444, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1065634.2399999998, "aei": 0.01}, {"facility": "Connacher/Great Divide", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.4123, "benchmark": 0.4467, "net_cost": 0, "net_credit": 0.458, "net_position": -0.458, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 888953.1399999999, "aei": 0.04}, {"facility": "Horizon", "type": "Mining & Upgrading", "year": 2029, "intensity": 0.3422, "benchmark": 0.3757, "net_cost": 0, "net_credit": 0.446, "net_position": -0.446, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 108.75, "royalty": 0.3631, "is_post_payout": true, "status": "CREDIT", "production": 13724260.9, "aei": 0.0043}, {"facility": "Orion", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.4712, "benchmark": 0.3736, "net_cost": 0.911, "net_credit": 0, "net_position": 0.911, "gross_cost": 1.688, "cost_pct_netback": 1.28, "netback": 71.35, "gross_pct": 0.0128, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1202240.6499999997, "aei": 0.01}, {"facility": "Surmont", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.4071, "benchmark": 0.3493, "net_cost": 0.54, "net_credit": 0, "net_position": 0.54, "gross_cost": 1.0, "cost_pct_netback": 0.76, "netback": 71.35, "gross_pct": 0.0076, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 7402729.460000001, "aei": 0.0034}, {"facility": "Foster Creek", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.2452, "benchmark": 0.2712, "net_cost": 0, "net_credit": 0.346, "net_position": -0.346, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 10628774.689999998, "aei": 0.04}, {"facility": "Firebag", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.3685, "benchmark": 0.3294, "net_cost": 0.365, "net_credit": 0, "net_position": 0.365, "gross_cost": 0.677, "cost_pct_netback": 0.51, "netback": 71.35, "gross_pct": 0.0051, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 12641292.38, "aei": 0.0124}, {"facility": "Suncor Oil Sands", "type": "Mining & Upgrading", "year": 2029, "intensity": 0.3399, "benchmark": 0.3038, "net_cost": 0.301, "net_credit": 0, "net_position": 0.301, "gross_cost": 0.624, "cost_pct_netback": 0.31, "netback": 96.35, "gross_pct": 0.0031, "carbon_price": 108.75, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18432793.5, "aei": 0.0237}, {"facility": "MEG Christina Lake", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.2955, "benchmark": 0.3078, "net_cost": 0, "net_credit": 0.163, "net_position": -0.163, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 5725560.260000001, "aei": 0.0254}, {"facility": "Leismer", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.3286, "benchmark": 0.3325, "net_cost": 0, "net_credit": 0.052, "net_position": -0.052, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 1305378.7099999995, "aei": 0.04}, {"facility": "Kirby", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.4389, "benchmark": 0.2518, "net_cost": 1.746, "net_credit": 0, "net_position": 1.746, "gross_cost": 3.234, "cost_pct_netback": 2.45, "netback": 71.35, "gross_pct": 0.0245, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 3410118.1, "aei": 0.01}, {"facility": "Kearl", "type": "Mining", "year": 2029, "intensity": 0.1823, "benchmark": 0.1815, "net_cost": 0.007, "net_credit": 0, "net_position": 0.007, "gross_cost": 0.013, "cost_pct_netback": 0.01, "netback": 76.35, "gross_pct": 0.0001, "carbon_price": 108.75, "royalty": 0.3141, "is_post_payout": true, "status": "DEBIT", "production": 16728696.3, "aei": 0.0131}, {"facility": "Fort Hills", "type": "Mining", "year": 2029, "intensity": 0.2102, "benchmark": 0.1772, "net_cost": 0.302, "net_credit": 0, "net_position": 0.302, "gross_cost": 0.572, "cost_pct_netback": 0.4, "netback": 76.35, "gross_pct": 0.004, "carbon_price": 108.75, "royalty": 0.3141, "is_post_payout": true, "status": "DEBIT", "production": 8911935.0, "aei": 0.01}, {"facility": "Jackfish 1,2&3", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.3747, "benchmark": 0.2767, "net_cost": 0.915, "net_credit": 0, "net_position": 0.915, "gross_cost": 1.695, "cost_pct_netback": 1.28, "netback": 71.35, "gross_pct": 0.0128, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 6580527.26, "aei": 0.0131}, {"facility": "Lindbergh", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.495, "benchmark": 0.2999, "net_cost": 1.825, "net_credit": 0, "net_position": 1.825, "gross_cost": 3.373, "cost_pct_netback": 2.56, "netback": 71.35, "gross_pct": 0.0256, "carbon_price": 108.75, "royalty": 0.2972, "is_post_payout": true, "status": "DEBIT", "production": 969010.1999999998, "aei": 0.01}, {"facility": "Hangingstone Expansion", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.4703, "benchmark": 0.2917, "net_cost": 1.667, "net_credit": 0, "net_position": 1.667, "gross_cost": 3.089, "cost_pct_netback": 2.34, "netback": 71.35, "gross_pct": 0.0234, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1070010.8199999998, "aei": 0.01}, {"facility": "Hangingstone Enhanced Recovery", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.4005, "benchmark": 0.4906, "net_cost": 0, "net_credit": 1.2, "net_position": -1.2, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 449674.73, "aei": 0.04}, {"facility": "Hangingstone Demo", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.783, "benchmark": 0.549, "net_cost": 2.184, "net_credit": 0, "net_position": 2.184, "gross_cost": 4.047, "cost_pct_netback": 3.06, "netback": 71.35, "gross_pct": 0.0306, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 221115.89, "aei": 0.0333}, {"facility": "MacKay River Commercial", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.7527, "benchmark": 0.6398, "net_cost": 1.054, "net_credit": 0, "net_position": 1.054, "gross_cost": 1.952, "cost_pct_netback": 1.48, "netback": 71.35, "gross_pct": 0.0148, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 568376.4, "aei": 0.0302}, {"facility": "BlackGold", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.4687, "benchmark": 0.3397, "net_cost": 1.204, "net_credit": 0, "net_position": 1.204, "gross_cost": 2.231, "cost_pct_netback": 1.69, "netback": 71.35, "gross_pct": 0.0169, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 444894.65, "aei": 0.0037}, {"facility": "Sunrise", "type": "In Situ (SAGD)", "year": 2029, "intensity": 0.4004, "benchmark": 0.4357, "net_cost": 0, "net_credit": 0.47, "net_position": -0.47, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 108.75, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 2839288.79, "aei": 0.0265}], "2030": [{"facility": "Christina Lake (Cenovus)", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.2345, "benchmark": 0.2262, "net_cost": 0.093, "net_credit": 0, "net_position": 0.093, "gross_cost": 0.172, "cost_pct_netback": 0.13, "netback": 71.35, "gross_pct": 0.0013, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 13769028.2, "aei": 0.0174}, {"facility": "Cold Lake", "type": "In Situ (CSS)", "year": 2030, "intensity": 0.6159, "benchmark": 0.3766, "net_cost": 2.669, "net_credit": 0, "net_position": 2.669, "gross_cost": 4.946, "cost_pct_netback": 3.74, "netback": 71.35, "gross_pct": 0.0374, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 7946146.56, "aei": 0}, {"facility": "MacKay River (Suncor)", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.4037, "benchmark": 0.3872, "net_cost": 0.185, "net_credit": 0, "net_position": 0.185, "gross_cost": 0.342, "cost_pct_netback": 0.26, "netback": 71.35, "gross_pct": 0.0026, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1947376.68, "aei": 0.0271}, {"facility": "Mildred Lake & Aurora", "type": "Mining & Upgrading", "year": 2030, "intensity": 0.6402, "benchmark": 0.5042, "net_cost": 1.355, "net_credit": 0, "net_position": 1.355, "gross_cost": 2.812, "cost_pct_netback": 1.41, "netback": 96.35, "gross_pct": 0.0141, "carbon_price": 130.0, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18382530.9, "aei": 0.01}, {"facility": "CNUL Peace River", "type": "In Situ", "year": 2030, "intensity": 0.6292, "benchmark": 0.7692, "net_cost": 0, "net_credit": 2.229, "net_position": -2.229, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 219034.3, "aei": 0.04}, {"facility": "CNRL Muskeg/Jackpine/Scotford", "type": "Mining & Upgrading", "year": 2030, "intensity": 0.2625, "benchmark": 0.2894, "net_cost": 0, "net_credit": 0.428, "net_position": -0.428, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 130.0, "royalty": 0.3741, "is_post_payout": true, "status": "CREDIT", "production": 18125819.7, "aei": 0.0161}, {"facility": "Wolf Lake & Primrose", "type": "In Situ", "year": 2030, "intensity": 0.5404, "benchmark": 0.4323, "net_cost": 1.206, "net_credit": 0, "net_position": 1.206, "gross_cost": 2.235, "cost_pct_netback": 1.69, "netback": 71.35, "gross_pct": 0.0169, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 4786594.02, "aei": 0.022}, {"facility": "Long Lake", "type": "In Situ (SAGD+Upg)", "year": 2030, "intensity": 0.4389, "benchmark": 0.4242, "net_cost": 0.164, "net_credit": 0, "net_position": 0.164, "gross_cost": 0.304, "cost_pct_netback": 0.23, "netback": 71.35, "gross_pct": 0.0023, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 3845624.11, "aei": 0.01}, {"facility": "Tucker Thermal", "type": "In Situ (CSS)", "year": 2030, "intensity": 0.8044, "benchmark": 0.454, "net_cost": 3.909, "net_credit": 0, "net_position": 3.909, "gross_cost": 7.242, "cost_pct_netback": 5.48, "netback": 71.35, "gross_pct": 0.0548, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1065634.2399999998, "aei": 0.01}, {"facility": "Connacher/Great Divide", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.3958, "benchmark": 0.4288, "net_cost": 0, "net_credit": 0.526, "net_position": -0.526, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 888953.1399999999, "aei": 0.04}, {"facility": "Horizon", "type": "Mining & Upgrading", "year": 2030, "intensity": 0.3407, "benchmark": 0.3606, "net_cost": 0, "net_credit": 0.318, "net_position": -0.318, "gross_cost": 0, "cost_pct_netback": 0, "netback": 96.35, "gross_pct": 0.0, "carbon_price": 130.0, "royalty": 0.3631, "is_post_payout": true, "status": "CREDIT", "production": 13724260.9, "aei": 0.0043}, {"facility": "Orion", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.4665, "benchmark": 0.3587, "net_cost": 1.203, "net_credit": 0, "net_position": 1.203, "gross_cost": 2.229, "cost_pct_netback": 1.69, "netback": 71.35, "gross_pct": 0.0169, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1202240.6499999997, "aei": 0.01}, {"facility": "Surmont", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.4057, "benchmark": 0.3353, "net_cost": 0.785, "net_credit": 0, "net_position": 0.785, "gross_cost": 1.455, "cost_pct_netback": 1.1, "netback": 71.35, "gross_pct": 0.011, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 7402729.460000001, "aei": 0.0034}, {"facility": "Foster Creek", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.2354, "benchmark": 0.2604, "net_cost": 0, "net_credit": 0.398, "net_position": -0.398, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 10628774.689999998, "aei": 0.04}, {"facility": "Firebag", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.3639, "benchmark": 0.3162, "net_cost": 0.532, "net_credit": 0, "net_position": 0.532, "gross_cost": 0.986, "cost_pct_netback": 0.75, "netback": 71.35, "gross_pct": 0.0075, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 12641292.38, "aei": 0.0124}, {"facility": "Suncor Oil Sands", "type": "Mining & Upgrading", "year": 2030, "intensity": 0.3318, "benchmark": 0.2916, "net_cost": 0.4, "net_credit": 0, "net_position": 0.4, "gross_cost": 0.831, "cost_pct_netback": 0.42, "netback": 96.35, "gross_pct": 0.0042, "carbon_price": 130.0, "royalty": 0.3741, "is_post_payout": true, "status": "DEBIT", "production": 18432793.5, "aei": 0.0237}, {"facility": "MEG Christina Lake", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.288, "benchmark": 0.2955, "net_cost": 0, "net_credit": 0.118, "net_position": -0.118, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 5725560.260000001, "aei": 0.0254}, {"facility": "Leismer", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.3155, "benchmark": 0.3192, "net_cost": 0, "net_credit": 0.06, "net_position": -0.06, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 1305378.7099999995, "aei": 0.04}, {"facility": "Kirby", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.4345, "benchmark": 0.2417, "net_cost": 2.15, "net_credit": 0, "net_position": 2.15, "gross_cost": 3.984, "cost_pct_netback": 3.01, "netback": 71.35, "gross_pct": 0.0301, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 3410118.1, "aei": 0.01}, {"facility": "Kearl", "type": "Mining", "year": 2030, "intensity": 0.1799, "benchmark": 0.1743, "net_cost": 0.061, "net_credit": 0, "net_position": 0.061, "gross_cost": 0.116, "cost_pct_netback": 0.08, "netback": 76.35, "gross_pct": 0.0008, "carbon_price": 130.0, "royalty": 0.3141, "is_post_payout": true, "status": "DEBIT", "production": 16728696.3, "aei": 0.0131}, {"facility": "Fort Hills", "type": "Mining", "year": 2030, "intensity": 0.2081, "benchmark": 0.1701, "net_cost": 0.415, "net_credit": 0, "net_position": 0.415, "gross_cost": 0.786, "cost_pct_netback": 0.54, "netback": 76.35, "gross_pct": 0.0054, "carbon_price": 130.0, "royalty": 0.3141, "is_post_payout": true, "status": "DEBIT", "production": 8911935.0, "aei": 0.01}, {"facility": "Jackfish 1,2&3", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.3698, "benchmark": 0.2656, "net_cost": 1.162, "net_credit": 0, "net_position": 1.162, "gross_cost": 2.153, "cost_pct_netback": 1.63, "netback": 71.35, "gross_pct": 0.0163, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 6580527.26, "aei": 0.0131}, {"facility": "Lindbergh", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.49, "benchmark": 0.2879, "net_cost": 2.261, "net_credit": 0, "net_position": 2.261, "gross_cost": 4.178, "cost_pct_netback": 3.17, "netback": 71.35, "gross_pct": 0.0317, "carbon_price": 130.0, "royalty": 0.2972, "is_post_payout": true, "status": "DEBIT", "production": 969010.1999999998, "aei": 0.01}, {"facility": "Hangingstone Expansion", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.4656, "benchmark": 0.28, "net_cost": 2.07, "net_credit": 0, "net_position": 2.07, "gross_cost": 3.836, "cost_pct_netback": 2.9, "netback": 71.35, "gross_pct": 0.029, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 1070010.8199999998, "aei": 0.01}, {"facility": "Hangingstone Enhanced Recovery", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.3845, "benchmark": 0.471, "net_cost": 0, "net_credit": 1.377, "net_position": -1.377, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 449674.73, "aei": 0.04}, {"facility": "Hangingstone Demo", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.757, "benchmark": 0.527, "net_cost": 2.565, "net_credit": 0, "net_position": 2.565, "gross_cost": 4.752, "cost_pct_netback": 3.59, "netback": 71.35, "gross_pct": 0.0359, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 221115.89, "aei": 0.0333}, {"facility": "MacKay River Commercial", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.73, "benchmark": 0.6142, "net_cost": 1.291, "net_credit": 0, "net_position": 1.291, "gross_cost": 2.393, "cost_pct_netback": 1.81, "netback": 71.35, "gross_pct": 0.0181, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 568376.4, "aei": 0.0302}, {"facility": "BlackGold", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.467, "benchmark": 0.3261, "net_cost": 1.572, "net_credit": 0, "net_position": 1.572, "gross_cost": 2.912, "cost_pct_netback": 2.2, "netback": 71.35, "gross_pct": 0.022, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "DEBIT", "production": 444894.65, "aei": 0.0037}, {"facility": "Sunrise", "type": "In Situ (SAGD)", "year": 2030, "intensity": 0.3898, "benchmark": 0.4183, "net_cost": 0, "net_credit": 0.454, "net_position": -0.454, "gross_cost": 0, "cost_pct_netback": 0, "netback": 71.35, "gross_pct": 0.0, "carbon_price": 130.0, "royalty": 0.2991, "is_post_payout": true, "status": "CREDIT", "production": 2839288.79, "aei": 0.0265}]};
+const YEARS = [2024,2025,2026,2027,2028,2029,2030];
+const TYPE_COLORS = {
+  'In Situ (SAGD)':     '#2563a8',
+  'In Situ (CSS)':      '#7c3aed',
+  'In Situ':            '#0891b2',
+  'In Situ (SAGD+Upg)': '#c2410c',
+  'Mining':             '#b45309',
+  'Mining & Upgrading': '#be185d',
+};
+function tc(t) { return TYPE_COLORS[t] || '#6b7588'; }
+
+let yr = 2026;
+let activeTypes = new Set(['ALL']);
+
+const yrSlide = document.getElementById('yrSlide');
+const yrNum   = document.getElementById('yrNum');
+const tt      = document.getElementById('tt');
+const ttTitle = document.getElementById('tt-title');
+const ttBody  = document.getElementById('tt-body');
+
+function buildPills() {
+  const bar = document.getElementById('sectorBar');
+  const allTypes = [...new Set(Object.values(D).flatMap(y => y.map(r => r.type)))].sort();
+  allTypes.forEach(t => {
+    const col = tc(t);
+    const p = document.createElement('button');
+    p.className = 's-pill'; p.dataset.type = t; p.textContent = t;
+    bar.appendChild(p);
+  });
+  bar.addEventListener('click', e => {
+    const btn = e.target.closest('.s-pill');
+    if (!btn) return;
+    const type = btn.dataset.type;
+    const allBtn = bar.querySelector('[data-type="ALL"]');
+    if (type === 'ALL') {
+      activeTypes = new Set(['ALL']);
+      bar.querySelectorAll('.s-pill').forEach(b => {
+        const isAll = b.dataset.type === 'ALL';
+        b.classList.toggle('on', isAll);
+        b.style.background = isAll ? 'var(--text)' : '';
+        b.style.color = isAll ? 'var(--surf1)' : '';
+      });
+    } else {
+      allBtn.classList.remove('on');
+      allBtn.style.background = ''; allBtn.style.color = '';
+      activeTypes.delete('ALL');
+      if (activeTypes.has(type)) {
+        if (activeTypes.size > 1) {
+          activeTypes.delete(type);
+          btn.classList.remove('on'); btn.style.background=''; btn.style.color='';
+        }
+      } else {
+        activeTypes.add(type);
+        btn.classList.add('on');
+        btn.style.background = tc(type); btn.style.color = '#fff';
+      }
+      if (activeTypes.size === 0) {
+        activeTypes.add('ALL'); allBtn.classList.add('on');
+        allBtn.style.background='var(--text)'; allBtn.style.color='var(--surf1)';
+      }
+    }
+    redraw();
+  });
+}
+
+function getData(year) {
+  const rows = D[year] || [];
+  return activeTypes.has('ALL') ? rows : rows.filter(r => activeTypes.has(r.type));
+}
+
+function showTT(e, d) {
+  ttTitle.textContent = d.facility;
+  const posSign = d.net_position >= 0 ? '+' : '';
+  const posClass = d.net_position < 0 ? 'tt-credit' : 'tt-debit';
+  ttBody.innerHTML = [
+    ['Type', d.type, ''],
+    ['Status', d.status, d.status==='DEBIT'?'tt-debit':'tt-credit'],
+    ['Intensity', d.intensity.toFixed(3)+' tCO₂/m³', ''],
+    ['Benchmark', d.benchmark ? d.benchmark.toFixed(3)+' tCO₂/m³' : '—', ''],
+    ['After-shield cost', '$'+d.net_cost.toFixed(3)+'/bbl', 'tt-debit'],
+    ['Credit revenue', '$'+d.net_credit.toFixed(3)+'/bbl', 'tt-credit'],
+    ['Net position', posSign+'$'+d.net_position.toFixed(3)+'/bbl', posClass],
+    ['Royalty', (d.royalty*100).toFixed(1)+'%', ''],
+    ['Payout', d.is_post_payout ? 'Post' : 'Pre', ''],
+    ['Carbon price', '$'+d.carbon_price+'/t', ''],
+    ...(d.status==='DEBIT' ? [[
+      '⚠ CC ratio', (d.gross_pct*100).toFixed(1)+'% of net sales'
+        + (d.gross_pct>0.03?' — BCCA eligible':''),
+      d.gross_pct>0.03?'tt-warn':''
+    ]] : []),
+  ].map(([k,v,c]) =>
+    `<div class="tt-row"><span class="tt-k">${k}</span><span class="tt-v ${c}">${v}</span></div>`
+  ).join('');
+  tt.classList.add('show'); moveTT(e);
+}
+function hideTT() { tt.classList.remove('show'); }
+function moveTT(e) {
+  const x=e.clientX+14, y=e.clientY-8;
+  const w=tt.offsetWidth, h=tt.offsetHeight;
+  tt.style.left=(x+w>window.innerWidth?x-w-28:x)+'px';
+  tt.style.top=(y+h>window.innerHeight?y-h:y)+'px';
+}
+document.addEventListener('mousemove', moveTT);
+
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs={}, txt='') {
+  const e = document.createElementNS(NS, tag);
+  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+  if (txt) e.textContent = txt;
+  return e;
+}
+function clear(svg) { while(svg.firstChild) svg.removeChild(svg.firstChild); }
+function svgW(svg) { return svg.getBoundingClientRect().width || 460; }
+
+function updateKPI(year) {
+  const d=getData(year), deb=d.filter(r=>r.status==='DEBIT'), cre=d.filter(r=>r.status==='CREDIT');
+  const avgC  = deb.length?(deb.reduce((s,r)=>s+r.net_cost,0)/deb.length).toFixed(2):'—';
+  const maxC  = deb.length?Math.max(...deb.map(r=>r.net_cost)).toFixed(2):'—';
+  const avgCr = cre.length?(cre.reduce((s,r)=>s+r.net_credit,0)/cre.length).toFixed(2):'—';
+  const maxCr = cre.length?Math.max(...cre.map(r=>r.net_credit)).toFixed(2):'—';
+  const cp    = d.length?d[0].carbon_price:0;
+
+  // Production-weighted net position across all selected facilities
+  const totalProd = d.reduce((s,r)=>s+r.production, 0);
+  const wtdAvg = totalProd > 0
+    ? d.reduce((s,r)=>s + r.net_position * r.production, 0) / totalProd
+    : 0;
+  const wtdEl  = document.getElementById('kWtdAvg');
+  const wtdSub = document.getElementById('kWtdSub');
+  wtdEl.textContent = (wtdAvg >= 0 ? '+' : '') + '$' + wtdAvg.toFixed(2);
+  wtdEl.style.color = wtdAvg > 0.01 ? 'var(--red)' : wtdAvg < -0.01 ? 'var(--green)' : 'var(--text)';
+  wtdSub.textContent = 'prodn-wtd net pos · ' + d.length + ' facilities';
+
+  // Cost containment risk count
+  const ccFac = deb.filter(r => r.gross_pct > 0.03);
+  const ccEl  = document.getElementById('kCC');
+  const ccSub = document.getElementById('kCCSub');
+  ccEl.textContent = '' + ccFac.length;
+  ccEl.style.color = ccFac.length > 0 ? 'var(--amber)' : 'var(--dim)';
+  ccSub.textContent = ccFac.length > 0
+    ? ccFac.map(r=>r.facility.split(' ')[0]).slice(0,3).join(', ') + (ccFac.length>3?' …':'')
+    : 'no facilities at threshold';
+
+  document.getElementById('kDebit').textContent=''+deb.length;
+  document.getElementById('kDebitSub').textContent='of '+d.length+' selected';
+  document.getElementById('kCredit').textContent=''+cre.length;
+  document.getElementById('kAvgCost').textContent='$'+avgC;
+  document.getElementById('kMaxCost').textContent='max $'+maxC+'/bbl';
+  document.getElementById('kAvgCredit').textContent='$'+avgCr;
+  document.getElementById('kMaxCredit').textContent='max $'+maxCr+'/bbl';
+  document.getElementById('kCP').textContent='$'+cp.toFixed(0);
+}
+
+function drawScatter(year) {
+  const svg=document.getElementById('svgScatter'), W=svgW(svg), H=270;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); clear(svg);
+  const d=getData(year).filter(r=>r.benchmark);
+  const pad={l:44,r:18,t:10,b:36}, pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+  const allV=[...d.map(r=>r.intensity),...d.map(r=>r.benchmark)];
+  if (!allV.length) return;
+  const mx=Math.max(...allV,0.2)*1.10;
+  const sx=v=>pad.l+v/mx*pw, sy=v=>pad.t+ph-v/mx*ph;
+  [0,.2,.4,.6,.8,1.0,1.2].filter(v=>v<=mx*1.05).forEach(t=>{
+    svg.appendChild(el('line',{x1:sx(t),y1:pad.t,x2:sx(t),y2:pad.t+ph,class:'grid-ln'}));
+    svg.appendChild(el('line',{x1:pad.l,y1:sy(t),x2:pad.l+pw,y2:sy(t),class:'grid-ln'}));
+    svg.appendChild(el('text',{x:sx(t),y:pad.t+ph+14,class:'axis-lbl','text-anchor':'middle'},t.toFixed(1)));
+    if(t>0) svg.appendChild(el('text',{x:pad.l-6,y:sy(t)+4,class:'axis-lbl','text-anchor':'end'},t.toFixed(1)));
+  });
+  svg.appendChild(el('line',{x1:sx(0),y1:sy(0),x2:sx(mx*.96),y2:sy(mx*.96),
+    stroke:'#d4960a',opacity:'.3','stroke-width':'1','stroke-dasharray':'6 4'}));
+  const lx=sx(mx*.55),ly=sy(mx*.55);
+  svg.appendChild(el('text',{x:lx,y:ly-6,fill:'#b07d1a','font-size':'8','font-family':'DM Mono',
+    'text-anchor':'middle',transform:`rotate(-45,${lx},${ly-6})`},'I = B'));
+  svg.appendChild(el('text',{x:pad.l+pw/2,y:H-2,class:'axis-lbl','text-anchor':'middle'},'Emission Intensity (tCO₂/m³)'));
+  svg.appendChild(el('text',{x:11,y:pad.t+ph/2,class:'axis-lbl','text-anchor':'middle',
+    transform:`rotate(-90,11,${pad.t+ph/2})`},'Benchmark (tCO₂/m³)'));
+  const maxP=Math.max(...d.map(r=>r.production));
+  for (const r of d) {
+    const cx=sx(r.intensity),cy=sy(r.benchmark),rad=5+(r.production/maxP)*16;
+    const col=r.status==='DEBIT'?'var(--red-lt)':'var(--green-lt)';
+    const c=el('circle',{cx,cy,r:rad,fill:col,opacity:'.6',stroke:col,'stroke-width':'1.2',style:'cursor:pointer'});
+    c.addEventListener('mouseenter',e=>{c.setAttribute('opacity','1');c.setAttribute('r',rad+3);showTT(e,r);});
+    c.addEventListener('mouseleave',()=>{c.setAttribute('opacity','.6');c.setAttribute('r',rad);hideTT();});
+    svg.appendChild(c);
+    if(r.production>maxP*0.06) {
+      const short=r.facility.split(' ').slice(-2).join(' ');
+      svg.appendChild(el('text',{x:cx,y:cy-rad-5,fill:col,'font-size':'7.5','font-family':'DM Mono',
+        'text-anchor':'middle',opacity:'.9','pointer-events':'none'},short.slice(0,14)));
+    }
+  }
+}
+
+function drawPosition(year) {
+  const svg=document.getElementById('svgPosition'), W=svgW(svg), H=270;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); clear(svg);
+  const d=getData(year).sort((a,b)=>a.net_position-b.net_position);
+  if (!d.length) return;
+  const pad={l:148,r:14,t:10,b:28}, pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+
+  // ── SYMMETRIC AXIS ──
+  const maxAbs = Math.max(...d.map(r=>Math.abs(r.net_position)), 0.8);
+  const mid = pad.l + pw/2, sc = v => mid + (v/maxAbs)*(pw/2-4);
+
+  const bH=Math.max(5,Math.min(15,(ph/d.length)-3));
+  const y0=pad.t+(ph-d.length*(bH+3))/2;
+
+  // grid & ticks
+  const step = maxAbs > 2 ? 1 : 0.5;
+  const ticks = [];
+  for (let v=-Math.ceil(maxAbs); v<=Math.ceil(maxAbs)+0.01; v+=step)
+    ticks.push(parseFloat(v.toFixed(2)));
+  ticks.filter(v=>Math.abs(v)<=maxAbs*1.05).forEach(t=>{
+    const x=sc(t); if(x<pad.l||x>W-pad.r) return;
+    svg.appendChild(el('line',{x1:x,y1:pad.t,x2:x,y2:pad.t+ph,class:t===0?'zero-ln':'grid-ln'}));
+    svg.appendChild(el('text',{x,y:pad.t+ph+14,class:'axis-lbl','text-anchor':'middle'},
+      t===0?'0':(t>0?'+':'')+t.toFixed(1)));
+  });
+
+  // ── CC THRESHOLD LINE — 3% of net sales = netback × 0.03 ──
+  // net_position for debit facilities = net cost, so threshold is directly on this scale
+  const debRec = d.find(r=>r.status==='DEBIT' && r.netback>0);
+  if (debRec) {
+    const ccNetThr = debRec.netback * 0.03;
+    const ccX = sc(ccNetThr);
+    if (ccX > mid && ccX < W-pad.r) {
+      svg.appendChild(el('line',{x1:ccX,y1:pad.t,x2:ccX,y2:pad.t+ph,
+        stroke:'var(--amber)',strokeWidth:'1.5','stroke-dasharray':'4 3',opacity:'.8',
+        'pointer-events':'none'}));
+      svg.appendChild(el('text',{x:ccX+3,y:pad.t+9,fill:'var(--amber)','font-size':'7.5',
+        'font-family':'DM Mono','pointer-events':'none'},'3% CC'));
+    }
+  }
+
+  // ── BARS ──
+  d.forEach((r,i)=>{
+    const y=y0+i*(bH+3),neg=r.net_position<0;
+    const x1=sc(r.net_position),bx=neg?x1:mid,bw=Math.max(Math.abs(x1-mid),1.5);
+    const col=neg?'var(--green-lt)':'var(--red-lt)';
+    const rect=el('rect',{x:bx,y,width:bw,height:bH,fill:col,rx:'2',opacity:'.7',style:'cursor:pointer'});
+    rect.addEventListener('mouseenter',e=>{rect.setAttribute('opacity','1');showTT(e,r);});
+    rect.addEventListener('mouseleave',()=>{rect.setAttribute('opacity','.7');hideTT();});
+    svg.appendChild(rect);
+    svg.appendChild(el('text',{x:pad.l-5,y:y+bH/2+3.5,fill:'#1a2535','font-size':'8.5',
+      'font-family':'DM Mono','text-anchor':'end','pointer-events':'none'},
+      r.facility.length>20?r.facility.slice(0,20)+'…':r.facility));
+    if(bw>14) svg.appendChild(el('text',{x:neg?x1-3:x1+3,y:y+bH/2+3.5,fill:col,'font-size':'8',
+      'font-family':'DM Mono','text-anchor':neg?'end':'start','pointer-events':'none',opacity:'.9'},
+      (r.net_position>=0?'+':'')+r.net_position.toFixed(2)));
+  });
+  svg.appendChild(el('text',{x:W/2,y:H-2,class:'axis-lbl','text-anchor':'middle','font-size':'9'},
+    '← credit revenue ($/bbl)   |   after-shield debit cost ($/bbl) →'));
+}
+
+function drawTraj() {
+  const svg=document.getElementById('svgTraj'), W=svgW(svg), H=210;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`); clear(svg);
+  const pad={l:44,r:20,t:12,b:30}, pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+  const series=new Map();
+  YEARS.forEach(y=>{
+    getData(y).forEach(r=>{
+      if(!series.has(r.facility)) series.set(r.facility,{type:r.type,pts:[]});
+      series.get(r.facility).pts.push({y,v:r.net_cost});
+    });
+  });
+  if(!series.size) return;
+  const maxV=Math.max(...[...series.values()].flatMap(s=>s.pts.map(p=>p.v)),0.5);
+  const sx=y=>pad.l+(y-YEARS[0])/(YEARS[YEARS.length-1]-YEARS[0])*pw;
+  const sy=v=>pad.t+ph-(v/maxV)*ph;
+  const vTicks=[];
+  for(let v=0;v<=Math.ceil(maxV)+.5;v+=0.5){if(v<=maxV*1.08)vTicks.push(v);}
+  vTicks.forEach(t=>{
+    svg.appendChild(el('line',{x1:pad.l,y1:sy(t),x2:pad.l+pw,y2:sy(t),class:'grid-ln'}));
+    svg.appendChild(el('text',{x:pad.l-6,y:sy(t)+4,class:'axis-lbl','text-anchor':'end'},'$'+t.toFixed(1)));
+  });
+  YEARS.forEach(y=>{
+    const x=sx(y);
+    svg.appendChild(el('line',{x1:x,y1:pad.t,x2:x,y2:pad.t+ph,class:'grid-ln'}));
+    svg.appendChild(el('text',{x,y:pad.t+ph+14,class:'axis-lbl','text-anchor':'middle'},y));
+  });
+  svg.appendChild(el('line',{x1:sx(yr),y1:pad.t,x2:sx(yr),y2:pad.t+ph,
+    stroke:'var(--amber-lt)',opacity:'.5','stroke-width':'1.5'}));
+  for(const [fac,{type,pts}] of series.entries()){
+    const col=tc(type), pts2=pts.sort((a,b)=>a.y-b.y);
+    const pathD=pts2.map((p,i)=>`${i?'L':'M'}${sx(p.y)},${sy(p.v)}`).join(' ');
+    const path=el('path',{d:pathD,fill:'none',stroke:col,'stroke-width':'1.5',opacity:'.6',style:'cursor:pointer'});
+    path.addEventListener('mouseenter',e=>{
+      path.setAttribute('stroke-width','3');path.setAttribute('opacity','1');
+      const r=getData(yr).find(r=>r.facility===fac);
+      if(r) showTT(e,r);
+    });
+    path.addEventListener('mouseleave',()=>{path.setAttribute('stroke-width','1.5');path.setAttribute('opacity','.6');hideTT();});
+    svg.appendChild(path);
+    const last=pts2[pts2.length-1];
+    if(last.v>maxV*.30){
+      const short=fac.split(' ').slice(-1)[0];
+      svg.appendChild(el('text',{x:sx(last.y)+4,y:sy(last.v)+4,fill:col,'font-size':'8',
+        'font-family':'DM Mono',opacity:'.85','pointer-events':'none'},short.slice(0,10)));
+    }
+  }
+  svg.appendChild(el('text',{x:11,y:pad.t+ph/2,class:'axis-lbl','text-anchor':'middle',
+    transform:`rotate(-90,11,${pad.t+ph/2})`},'After-Shield Cost ($/bbl)'));
+}
+
+yrSlide.addEventListener('input',()=>{yr=+yrSlide.value;yrNum.textContent=yr;redraw();});
+document.getElementById('yrPrev').addEventListener('click',()=>{if(yr>2024){yr--;yrSlide.value=yr;yrNum.textContent=yr;redraw();}});
+document.getElementById('yrNext').addEventListener('click',()=>{if(yr<2030){yr++;yrSlide.value=yr;yrNum.textContent=yr;redraw();}});
+
+function redraw(){updateKPI(yr);drawScatter(yr);drawPosition(yr);drawTraj();}
+buildPills();
+redraw();
+window.addEventListener('resize',redraw);
+</script>
+</body>
+</html>
